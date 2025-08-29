@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plugin Repository</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- GSAP Animation Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- text animation  -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-bg">
+        <div class="floating-element el-1"></div>
+        <div class="floating-element el-2"></div>
+        <div class="floating-element el-3"></div>
+        <div class="floating-element el-4"></div>
+        <div class="floating-element el-5"></div>
+    </div>
+
+    <!-- Toevoeg Modal -->
+    <div class="modal fade" id="addPluginModal" tabindex="-1" aria-labelledby="addPluginModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addPluginModalLabel">
+                        <img src="images/add-icon.png" class="modal-icon" alt="Toevoegen">
+                        Plugin toevoegen
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="step1">
+                        <div class="mb-4">
+                            <label for="pluginUrl" class="form-label">
+                                <img src="images/link-icon.png" class="input-icon" alt="URL">
+                                Plugin URL
+                            </label>
+                            <input type="url" class="form-control" id="pluginUrl" placeholder="https://modrinth.com/plugin/...">
+                        </div>
+                    </div>
+                    
+                    <div id="step2" style="display: none;">
+                        <div class="alert alert-info d-flex align-items-center">
+                            <img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden">
+                            <span>Plugin informatie wordt opgehaald...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="step3" style="display: none;">
+                        <h5>
+                            <img src="images/details-icon.png" class="modal-icon" alt="Info">
+                            Plugin details
+                        </h5>
+                        <div class="card mb-3 preview-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <img id="previewIcon" class="plugin-icon me-3" alt="Plugin icon">
+                                    <h5 id="previewTitle" class="card-title mb-0"></h5>
+                                </div>
+                                <p id="previewDescription" class="card-text"></p>
+                                <div class="mb-3">
+                                    <p class="me-4"><strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong> <span id="previewAuthor"></span></p>
+                                </div>
+                                <div>
+                                    <p><strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Versies:</strong></p>
+                                    <div class="versions-container" id="previewVersions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="confirmation-question">
+                            <img src="images/details-icon.png" class="info-icon" alt="Vraag"> Is dit de correcte plugin?
+                        </div>
+                        
+                        <div class="confirmation-buttons">
+                            <button type="button" class="btn btn-yes" id="confirmYes">
+                                <img src="images/confirm-icon.png" class="btn-icon" alt="Ja"> Ja
+                            </button>
+                            <button type="button" class="btn btn-no" id="confirmNo">
+                                <img src="images/cancel-icon.png" class="btn-icon" alt="Nee"> Nee
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="errorMessage" class="alert alert-danger d-flex align-items-center mt-3" style="display: none;">
+                        <img src="images/error-icon.png" class="error-icon me-2" alt="Fout">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <img src="images/cancel-icon.png" class="btn-icon" alt="Annuleren">
+                        Annuleren
+                    </button>
+                    <button type="button" class="btn btn-primary" id="fetchButton">
+                        <img src="images/fetch-icon.png" class="btn-icon" alt="Ophalen">
+                        Ophalen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verwijder Bevestigingsmodal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">
+                        <img src="images/delete-icon.png" class="modal-icon" alt="Verwijderen">
+                        Plugin verwijderen
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <img src="images/confirm-delete-icon.png" class="delete-modal-icon" alt="Bevestig verwijderen">
+                    </div>
+                    <p class="text-center">Weet je zeker dat je de plugin <strong id="pluginToDeleteTitle">FancyNpcs</strong> wilt verwijderen?</p>
+                    <p class="text-center text-muted">Deze actie kan niet ongedaan worden gemaakt.</p>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <img src="images/cancel-icon.png" class="btn-icon" alt="Annuleren">
+                        Annuleren
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteButton">
+                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
+                        Verwijderen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid my-5">
+        <header class="text-center mb-5 position-relative">
+            <h1 class="ml9 text-center position-relative">
+                <div>
+                    <img src="images/plugin-repo-icon.png" class="header-icon mb-4" alt="Plugin Repository">
+                    <span class="text-wrapper">
+                        <span class="letters">VulcanoCraft Plugin Repository</span>
+                    </span>
+                </div>
+                
+            </h1>
+            <p class="lead text-light">Overzicht van alle beschikbare plugins</p>
+            
+            <!-- Filter en Zoek Sectie -->
+            <div class="filters-section mt-4 mb-4">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="card shadow-sm border-0 filter-card">
+                            <div class="card-body p-4">
+                                <div class="row g-3 align-items-end">
+                                    <!-- Zoekbalk -->
+                                    <div class="col-md-4">
+                                        <label for="searchInput" class="form-label fw-bold">
+                                            <img src="images/fetch-icon.png" class="input-icon" alt="Zoeken">
+                                            Zoeken
+                                        </label>
+                                        <input type="text" class="form-control search-input" id="searchInput" placeholder="Zoek plugins...">
+                                    </div>
+                                    
+                                    <!-- Versie Filter -->
+                                    <div class="col-md-3">
+                                        <label for="versionFilter" class="form-label fw-bold">
+                                            <img src="images/version-icon.png" class="input-icon" alt="Versie">
+                                            Versie
+                                        </label>
+                                        <select class="form-select version-filter" id="versionFilter">
+                                            <option value="">Alle versies</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Platform Filters -->
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-bold">
+                                            <img src="images/plugin-repo-icon.png" class="input-icon" alt="Platform">
+                                            Platform
+                                        </label>
+                                        <div class="platform-filters">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input platform-filter" type="checkbox" id="hangarFilter" value="hangar" checked>
+                                                <label class="form-check-label" for="hangarFilter">Hangar</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input platform-filter" type="checkbox" id="spigotFilter" value="spigot" checked>
+                                                <label class="form-check-label" for="spigotFilter">Spigot</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input platform-filter" type="checkbox" id="modrinthFilter" value="modrinth" checked>
+                                                <label class="form-check-label" for="modrinthFilter">Modrinth</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Reset Knop -->
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-outline-secondary w-100 reset-filters-btn" id="resetFilters">
+                                            <img src="images/cancel-icon.png" class="btn-icon" alt="Reset">
+                                            Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Toevoegknop -->
+             <div class="btn-container">
+                <button type="button" class="btn button-creative  btn-lg floating-add-btn" data-bs-toggle="modal" data-bs-target="#addPluginModal">
+                <img src="images/add-icon.png" class="btn-icon-lg" alt="Toevoegen">
+                Toevoegen
+            </button>
+             </div>
+            
+        </header>
+
+        <div class="row justify-content-center">
+            <div class="col-xxl-10 col-xl-11 col-lg-12" id="pluginsContainer">
+                <!-- Plugins worden hier dynamisch geladen -->
+                <div class="text-center">
+                    <img src="images/loading-plugins.gif" class="loading-plugins" alt="Plugins laden">
+                    <p class="mt-2">Plugins laden...</p>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-5 pt-4 border-top">
+            <p class="text-muted">
+                <img src="images/code-icon.png" class="footer-icon" alt="Gecodeerd door">
+                Plugin Repository &copy; <span id="currentYear"></span>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const addModal = new bootstrap.Modal(document.getElementById('addPluginModal'));
+            const pluginUrlInput = document.getElementById('pluginUrl');
+            const fetchButton = document.getElementById('fetchButton');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            const errorMessage = document.getElementById('errorMessage');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+            
+            // Huidige plugin die wordt verwijderd
+            let currentDeleteUrl = '';
+            
+            // Verberg error message bij opstarten
+            hideError();
+            
+            // Reset modal wanneer hij gesloten wordt
+            document.getElementById('addPluginModal').addEventListener('hidden.bs.modal', function () {
+                step1.style.display = 'block';
+                step2.style.display = 'none';
+                step3.style.display = 'none';
+                hideError();
+                pluginUrlInput.value = '';
+                
+                // Toon de knoppen weer
+                document.getElementById('fetchButton').style.display = 'inline-block';
+                document.querySelector('.modal-footer .btn-secondary').style.display = 'inline-block';
+                
+                // Reset Ja-knop
+                const confirmYesBtn = document.getElementById('confirmYes');
+                confirmYesBtn.innerHTML = '<img src="images/confirm-icon.png" class="btn-icon" alt="Ja"> Ja';
+                confirmYesBtn.disabled = false;
+                
+                // Reset modal backdrop instellingen
+                const modalElement = document.getElementById('addPluginModal');
+                modalElement.setAttribute('data-bs-backdrop', 'true');
+                modalElement.setAttribute('data-bs-keyboard', 'true');
+            });
+            
+            // Fetch knop
+            fetchButton.addEventListener('click', function() {
+                const url = pluginUrlInput.value.trim();
+                if (!url) {
+                    showError('Vul een URL in');
+                    return;
+                }
+                
+                // Toon laadanimatie
+                step1.style.display = 'none';
+                step2.style.display = 'block';
+                step3.style.display = 'none';
+                hideError();
+                
+                // Haal plugin data op van de server
+                fetch('/fetch_plugin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Server reageerde met status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(plugin => {
+                    // Verberg laadanimatie
+                    step2.style.display = 'none';
+                    
+                    // Vul de preview met de opgehaalde data
+                    document.getElementById('previewTitle').textContent = plugin.title || "Geen titel";
+                    document.getElementById('previewDescription').textContent = plugin.description || "Geen beschrijving beschikbaar";
+                    document.getElementById('previewAuthor').textContent = plugin.author || "Onbekend";
+                    // Toon versies als badges
+                    const versionsContainer = document.getElementById('previewVersions');
+                    if (plugin.versions) {
+                        const versions = plugin.versions.split(' ');
+                        let versionBadges = '';
+                        let delay = 0;
+                        
+                        versions.forEach(version => {
+                            versionBadges += `<span class="version-badge" style="animation-delay: ${delay}ms">${version}</span>`;
+                            delay += 100;
+                        });
+                        
+                        versionsContainer.innerHTML = versionBadges;
+                    } else {
+                        versionsContainer.innerHTML = '<span class="badge bg-secondary">Geen versies</span>';
+                    }
+                    
+                    // Toon altijd een afbeelding (plugin icon of placeholder)
+                    if (plugin.icon) {
+                        document.getElementById('previewIcon').src = plugin.icon;
+                    } else {
+                        document.getElementById('previewIcon').src = 'images/plugin-placeholder.png';
+                    }
+                    document.getElementById('previewIcon').style.display = "block";
+                    
+                    // Toon stap 3 (plugin informatie) en zorg dat deze zichtbaar blijft
+                    step3.style.display = 'block';
+                    
+                    // Verberg de "Ophalen" knop en "Annuleren" knop in de footer
+                    document.getElementById('fetchButton').style.display = 'none';
+                    document.querySelector('.modal-footer .btn-secondary').style.display = 'none';
+                    
+                    // Voorkom dat de modal sluit bij klikken buiten de modal
+                    const modalElement = document.getElementById('addPluginModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    
+                    // Verwijder de standaard click handler van de modal backdrop
+                    modalElement.removeAttribute('data-bs-backdrop');
+                    modalElement.setAttribute('data-bs-backdrop', 'static');
+                    modalElement.removeAttribute('data-bs-keyboard');
+                    modalElement.setAttribute('data-bs-keyboard', 'false');
+                })
+                .catch(error => {
+                    console.error('Fout bij ophalen plugin:', error);
+                    showError('Fout bij ophalen plugin: ' + error);
+                    step2.style.display = 'none';
+                    step1.style.display = 'block';
+                });
+            });
+            
+            // Ja-knop
+            confirmYes.addEventListener('click', function() {
+                const url = pluginUrlInput.value.trim();
+                
+                // Toon loading icon in de Ja-knop
+                const originalContent = confirmYes.innerHTML;
+                confirmYes.innerHTML = '<img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden"> Toevoegen...';
+                confirmYes.disabled = true;
+                
+                // Voeg plugin toe via de server
+                fetch('/add_plugin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: url })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Toon succesbericht
+                        const successAlert = document.createElement('div');
+                        successAlert.className = 'alert alert-success alert-dismissible fade show';
+                        successAlert.innerHTML = `
+                            <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin succesvol toegevoegd!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        `;
+                        document.querySelector('.container-fluid').prepend(successAlert);
+                        
+                        // Herlaad plugins
+                        loadPlugins();
+                        
+                        addModal.hide();
+                    } else {
+                        // Reset knop bij fout
+                        confirmYes.innerHTML = originalContent;
+                        confirmYes.disabled = false;
+                        showError('Fout bij toevoegen: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    // Reset knop bij fout
+                    confirmYes.innerHTML = originalContent;
+                    confirmYes.disabled = false;
+                    showError('Fout bij toevoegen: ' + error);
+                });
+            });
+            
+            // Nee-knop
+            confirmNo.addEventListener('click', function() {
+                step3.style.display = 'none';
+                step1.style.display = 'block';
+                pluginUrlInput.value = '';
+                pluginUrlInput.focus();
+            });
+            
+            // Verwijderknop functionaliteit
+            confirmDeleteButton.addEventListener('click', function() {
+                const pluginTitle = document.getElementById('pluginToDeleteTitle').textContent;
+                const deleteModalElement = document.getElementById('deleteConfirmModal');
+                const deleteModal = bootstrap.Modal.getInstance(deleteModalElement) || new bootstrap.Modal(deleteModalElement);
+                
+                // Verwijder de plugin via de server
+                fetch('/delete_plugin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: currentDeleteUrl })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Sluit eerst de modal
+                        deleteModal.hide();
+                        
+                        // Wacht tot modal volledig gesloten is voordat we de plugins herladen
+                        deleteModalElement.addEventListener('hidden.bs.modal', function modalHiddenHandler() {
+                            // Verwijder deze event listener om duplicatie te voorkomen
+                            deleteModalElement.removeEventListener('hidden.bs.modal', modalHiddenHandler);
+                            
+                            // Herlaad alle plugins om de gefilterde lijst bij te werken
+                            loadPlugins();
+                            
+                            // Toon succesbericht
+                            const successAlert = document.createElement('div');
+                            successAlert.className = 'alert alert-success alert-dismissible fade show';
+                            successAlert.innerHTML = `
+                                <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin "${pluginTitle}" succesvol verwijderd!
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            `;
+                            document.querySelector('.container-fluid').prepend(successAlert);
+                            
+                            // Verwijder succesbericht na 5 seconden
+                            setTimeout(() => {
+                                if (successAlert.parentNode) {
+                                    successAlert.remove();
+                                }
+                            }, 5000);
+                        }, { once: true });
+                        
+                    } else {
+                        showError('Fout bij verwijderen: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    showError('Fout bij verwijderen: ' + error);
+                });
+            });
+            
+            // Voeg event listener toe voor het herstarten van de animatie wanneer de modal wordt geopend
+            document.getElementById('deleteConfirmModal').addEventListener('shown.bs.modal', function() {
+                const deleteIcon = this.querySelector('.delete-modal-icon');
+                if (deleteIcon) {
+                    // Herstart de animatie door de class tijdelijk te verwijderen en weer toe te voegen
+                    deleteIcon.style.animation = 'none';
+                    deleteIcon.offsetHeight; // Trigger reflow
+                    deleteIcon.style.animation = 'wiggle 1.2s ease-in-out';
+                }
+            });
+            
+            function showError(message) {
+                errorMessage.querySelector('span').textContent = message;
+                errorMessage.style.display = 'flex';
+                errorMessage.classList.add('show');
+            }
+            
+            function hideError() {
+                errorMessage.style.display = 'none';
+                errorMessage.classList.remove('show');
+            }
+            
+            // Laad plugins bij het opstarten
+            loadPlugins();
+            
+            function loadPlugins() {
+                // Haal plugins op van de server
+                fetch('/api/plugins')
+                    .then(response => response.json())
+                    .then(plugins => {
+                        renderPlugins(plugins);
+                    })
+                    .catch(error => {
+                        console.error('Fout bij laden plugins:', error);
+                        const pluginsContainer = document.getElementById('pluginsContainer');
+                        pluginsContainer.innerHTML = `
+                            <div class="col-12 text-center">
+                                <div class="alert alert-danger d-flex align-items-center justify-content-center" role="alert">
+                                    <img src="images/error-icon.png" class="error-icon me-2" alt="Fout">
+                                    Er is een fout opgetreden bij het laden van de plugins.
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+            
+            function renderPlugins(plugins) {
+                const pluginsContainer = document.getElementById('pluginsContainer');
+                
+                if (plugins.length === 0) {
+                    pluginsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-warning d-flex align-items-center justify-content-center" role="alert">
+                            <img src="images/warning-icon.png" class="warning-icon me-2" alt="Waarschuwing">
+                            Er zijn nog geen plugins beschikbaar.
+                        </div>
+                    </div>
+                    `;
+                    return;
+                }
+                
+                let pluginsHtml = '';
+                let animationDelay = 0;
+                
+                plugins.forEach(plugin => {
+                    const formattedVersions = formatVersions(plugin.versions || '');
+                    const domain = getDomainFromUrl(plugin.url || '');
+                    
+                    pluginsHtml += `
+                    <div class="col-12 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
+                                    <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}</h5>
+                                </div>
+                                <div>
+                                    <span class="domain-badge">${domain}</span>
+                                    <button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text description">${plugin.description || 'Geen beschrijving beschikbaar'}</p>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="plugin-info">
+                                            <strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong>
+                                            <span class="author-badge">${plugin.author || 'Onbekend'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="versions-section">
+                                    <strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Ondersteunde Versies:</strong>
+                                    <div class="versions-container">
+                                        ${formattedVersions}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="${plugin.url || '#'}" class="btn btn-primary" target="_blank">
+                                        <img src="images/external-link-icon.png" class="btn-icon" alt="Externe link">
+                                        Bekijk Plugin
+                                    </a>
+                                    <div class="url-container">
+                                        <small class="text-muted plugin-url" title="${plugin.url || ''}">
+                                            <img src="images/link-icon.png" class="footer-icon" alt="URL">
+                                            ${truncateUrl(plugin.url || '')}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                pluginsContainer.innerHTML = pluginsHtml;
+                
+                // Voeg event listeners toe aan verwijderknoppen
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const url = this.getAttribute('data-url');
+                        const title = this.getAttribute('data-title');
+                        
+                        document.getElementById('pluginToDeleteTitle').textContent = title;
+                        currentDeleteUrl = url;
+                        
+                        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                        deleteModal.show();
+                    });
+                });
+            }
+            
+            function formatVersions(versionsString) {
+                if (!versionsString) {
+                    return '<span class="badge bg-secondary">Geen versies</span>';
+                }
+                
+                const versions = versionsString.split(' ');
+                
+                if (versions.length === 0) {
+                    return '<span class="badge bg-secondary">Geen versies</span>';
+                }
+                
+                let versionBadges = '';
+                let delay = 0;
+                
+                versions.forEach(version => {
+                    versionBadges += `<span class="version-badge" style="animation-delay: ${delay}ms">${version}</span>`;
+                    delay += 100;
+                });
+                
+                return versionBadges;
+            }
+            
+            function getDomainFromUrl(url) {
+                try {
+                    const parsedUrl = new URL(url);
+                    let domain = parsedUrl.hostname;
+                    if (domain.startsWith('www.')) {
+                        domain = domain.substring(4);
+                    }
+                    return domain;
+                } catch (e) {
+                    return url;
+                }
+            }
+            
+            function truncateUrl(url, maxLength = 30) {
+                if (url.length <= maxLength) return url;
+                return url.substring(0, maxLength) + '...';
+            }
+            
+            // Filter en Zoek Functionaliteit
+            let allPlugins = [];
+            let filteredPlugins = [];
+            
+            // Overschrijf de renderPlugins functie om filtering te ondersteunen
+            const originalRenderPlugins = renderPlugins;
+            renderPlugins = function(plugins) {
+                allPlugins = plugins;
+                filteredPlugins = plugins;
+                populateVersionFilter(plugins);
+                originalRenderPlugins(plugins);
+                setupFilterEventListeners();
+            };
+            
+            function populateVersionFilter(plugins) {
+                const versionFilter = document.getElementById('versionFilter');
+                const allVersions = new Set();
+                
+                plugins.forEach(plugin => {
+                    if (plugin.versions) {
+                        const versions = plugin.versions.split(' ');
+                        versions.forEach(version => allVersions.add(version.trim()));
+                    }
+                });
+                
+                // Sorteer versies
+                const sortedVersions = Array.from(allVersions).sort((a, b) => {
+                    // Probeer numeriek te sorteren
+                    const aNum = parseFloat(a);
+                    const bNum = parseFloat(b);
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        return bNum - aNum; // Nieuwste eerst
+                    }
+                    return b.localeCompare(a); // Alfabetisch
+                });
+                
+                // Vul dropdown
+                versionFilter.innerHTML = '<option value="">Alle versies</option>';
+                sortedVersions.forEach(version => {
+                    const option = document.createElement('option');
+                    option.value = version;
+                    option.textContent = version;
+                    versionFilter.appendChild(option);
+                });
+            }
+            
+            function setupFilterEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                const versionFilter = document.getElementById('versionFilter');
+                const platformFilters = document.querySelectorAll('.platform-filter');
+                const resetButton = document.getElementById('resetFilters');
+                
+                // Zoek functionaliteit
+                searchInput.addEventListener('input', debounce(applyFilters, 300));
+                
+                // Versie filter
+                versionFilter.addEventListener('change', applyFilters);
+                
+                // Platform filters
+                platformFilters.forEach(filter => {
+                    filter.addEventListener('change', applyFilters);
+                });
+                
+                // Reset functionaliteit
+                resetButton.addEventListener('click', resetFilters);
+            }
+            
+            function applyFilters() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+                const selectedVersion = document.getElementById('versionFilter').value;
+                const selectedPlatforms = Array.from(document.querySelectorAll('.platform-filter:checked')).map(cb => cb.value);
+                
+                filteredPlugins = allPlugins.filter(plugin => {
+                    // Zoek filter
+                    const matchesSearch = !searchTerm || 
+                        (plugin.title && plugin.title.toLowerCase().includes(searchTerm)) ||
+                        (plugin.description && plugin.description.toLowerCase().includes(searchTerm)) ||
+                        (plugin.author && plugin.author.toLowerCase().includes(searchTerm));
+                    
+                    // Versie filter
+                    const matchesVersion = !selectedVersion || 
+                        (plugin.versions && plugin.versions.includes(selectedVersion));
+                    
+                    // Platform filter
+                    const pluginPlatform = getPlatformFromUrl(plugin.url);
+                    const matchesPlatform = selectedPlatforms.length === 0 || selectedPlatforms.includes(pluginPlatform);
+                    
+                    return matchesSearch && matchesVersion && matchesPlatform;
+                });
+                
+                renderFilteredPlugins();
+                updateResultsCount();
+            }
+            
+            function getPlatformFromUrl(url) {
+                if (!url) return 'unknown';
+                if (url.includes('hangar.papermc.io')) return 'hangar';
+                if (url.includes('spigotmc.org')) return 'spigot';
+                if (url.includes('modrinth.com')) return 'modrinth';
+                return 'unknown';
+            }
+            
+            function renderFilteredPlugins() {
+                const pluginsContainer = document.getElementById('pluginsContainer');
+                
+                if (filteredPlugins.length === 0) {
+                    pluginsContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
+                                <img src="images/fetch-icon.png" class="warning-icon me-2" alt="Geen resultaten">
+                                Geen plugins gevonden die voldoen aan de filters.
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                let pluginsHtml = '';
+                let animationDelay = 0;
+                
+                filteredPlugins.forEach(plugin => {
+                    const formattedVersions = formatVersions(plugin.versions || '');
+                    const domain = getDomainFromUrl(plugin.url || '');
+                    
+                    pluginsHtml += `
+                    <div class="col-12 mb-4 plugin-card" style="animation: fadeIn 0.6s ease-out ${animationDelay}ms both;">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
+                                    <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}</h5>
+                                </div>
+                                <div>
+                                    <span class="domain-badge">${domain}</span>
+                                    <button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text description">${plugin.description || 'Geen beschrijving beschikbaar'}</p>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="plugin-info">
+                                            <strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong>
+                                            <span class="author-badge">${plugin.author || 'Onbekend'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="versions-section">
+                                    <strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Ondersteunde Versies:</strong>
+                                    <div class="versions-container">
+                                        ${formattedVersions}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="${plugin.url || '#'}" class="btn btn-primary" target="_blank">
+                                        <img src="images/external-link-icon.png" class="btn-icon" alt="Externe link">
+                                        Bekijk Plugin
+                                    </a>
+                                    <div class="url-container">
+                                        <small class="text-muted plugin-url" title="${plugin.url || ''}">
+                                            <img src="images/link-icon.png" class="footer-icon" alt="URL">
+                                            ${truncateUrl(plugin.url || '')}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                    animationDelay += 100;
+                });
+                
+                pluginsContainer.innerHTML = pluginsHtml;
+                
+                // Voeg event listeners toe aan verwijderknoppen
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const url = this.getAttribute('data-url');
+                        const title = this.getAttribute('data-title');
+                        
+                        document.getElementById('pluginToDeleteTitle').textContent = title;
+                        currentDeleteUrl = url;
+                        
+                        const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                        deleteModal.show();
+                    });
+                });
+            }
+            
+            function updateResultsCount() {
+                // Voeg een resultaten teller toe als die nog niet bestaat
+                let resultsCounter = document.getElementById('resultsCounter');
+                if (!resultsCounter) {
+                    resultsCounter = document.createElement('div');
+                    resultsCounter.id = 'resultsCounter';
+                    resultsCounter.className = 'text-center mb-3 text-muted';
+                    const pluginsContainer = document.getElementById('pluginsContainer');
+                    pluginsContainer.parentNode.insertBefore(resultsCounter, pluginsContainer);
+                }
+                
+                const total = allPlugins.length;
+                const filtered = filteredPlugins.length;
+                
+                if (total === filtered) {
+                    resultsCounter.innerHTML = `<small>Alle ${total} plugins worden weergegeven</small>`;
+                } else {
+                    resultsCounter.innerHTML = `<small>${filtered} van ${total} plugins gevonden</small>`;
+                }
+            }
+            
+            function resetFilters() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('versionFilter').value = '';
+                document.querySelectorAll('.platform-filter').forEach(cb => cb.checked = true);
+                
+                filteredPlugins = allPlugins;
+                renderFilteredPlugins();
+                updateResultsCount();
+                
+                // Animatie voor reset knop
+                const resetBtn = document.getElementById('resetFilters');
+                resetBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    resetBtn.style.transform = 'scale(1)';
+                }, 150);
+            }
+            
+            // Debounce functie voor zoeken
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        });
+        // Set the current year dynamically in the footer
+        document.addEventListener('DOMContentLoaded', function () {
+        const currentYear = new Date().getFullYear();
+        document.getElementById('currentYear').textContent = currentYear;
+});
+    </script>
+    
+    <!-- AOS Initialisatie -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // AOS initialisatie
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-in-out',
+                once: false,
+                mirror: true,
+                offset: 100
+            });
+            
+            // GSAP animaties
+            initGSAPAnimations();
+            
+            // Extra interactieve animaties
+            initInteractiveAnimations();
+        });
+        
+        // GSAP animaties
+        function initGSAPAnimations() {
+            // Animeer de header
+            gsap.from('.navbar', {
+                y: -100,
+                opacity: 0,
+                duration: 1.2,
+                ease: 'power3.out'
+            });
+            
+            // Animeer de floating add button
+            gsap.to('.floating-add-btn', {
+                y: -10,
+                duration: 1.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+            
+            // Staggered animatie voor badges
+            gsap.from('.version-badge', {
+                scale: 0,
+                opacity: 0,
+                stagger: 0.1,
+                duration: 0.5,
+                ease: 'back.out(1.7)',
+                scrollTrigger: {
+                    trigger: '.versions-container',
+                    start: 'top bottom-=100',
+                    toggleActions: 'play none none none'
+                }
+            });
+        }
+        
+        // Interactieve animaties
+        function initInteractiveAnimations() {
+            // Plugin iconen animatie bij hover
+            const pluginIcons = document.querySelectorAll('.plugin-icon');
+            pluginIcons.forEach(icon => {
+                icon.addEventListener('mouseover', function() {
+                    gsap.to(this, {
+                        rotation: 10,
+                        scale: 1.15,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+                
+                icon.addEventListener('mouseout', function() {
+                    gsap.to(this, {
+                        rotation: 0,
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+            
+            // Animatie voor knoppen
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('mouseover', function() {
+                    gsap.to(this, {
+                        scale: 1.05,
+                        duration: 0.2
+                    });
+                });
+                
+                btn.addEventListener('mouseout', function() {
+                    gsap.to(this, {
+                        scale: 1,
+                        duration: 0.2
+                    });
+                });
+                
+                btn.addEventListener('mousedown', function() {
+                    gsap.to(this, {
+                        scale: 0.95,
+                        duration: 0.1
+                    });
+                });
+                
+                btn.addEventListener('mouseup', function() {
+                    gsap.to(this, {
+                        scale: 1.05,
+                        duration: 0.1
+                    });
+                });
+            });
+            
+            // Animatie voor kaarten bij verschijnen
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+            // Animatie voor floating elementen bij klikken
+            const floatingElements = document.querySelectorAll('.floating-element');
+            floatingElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    gsap.to(this, {
+                        scale: 1.2,
+                        rotation: '+=20',
+                        duration: 0.5,
+                        ease: 'elastic.out(1, 0.3)'
+                    });
+                    
+                    setTimeout(() => {
+                        gsap.to(this, {
+                            scale: 1,
+                            rotation: '-=20',
+                            duration: 1,
+                            ease: 'elastic.out(1, 0.3)'
+                        });
+                    }, 500);
+                });
+            });
+        }
+    </script>
+    <script>
+        // Wrap every letter in a span
+    var textWrapper = document.querySelector('.ml9 .letters');
+    textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
+
+    anime.timeline({loop: true})
+    .add({
+        targets: '.ml9 .letter',
+        scale: [0, 1],
+        duration: 1500,
+        elasticity: 600,
+        delay: (el, i) => 45 * (i+1)
+    }).add({
+        targets: '.ml9',
+        opacity: 1,
+        duration: 1000,
+        easing: "easeOutExpo",
+        delay: 1000
+    });
+
+    //add-plugin animation   
+    const button = document.querySelector('.button-creative');
+    const glow = button.querySelector('::before');
+
+    button.addEventListener('mousemove', (e) => {
+    const rect = button.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    button.style.setProperty('--x', `${x}px`);
+    button.style.setProperty('--y', `${y}px`);
+    });
+
+    </script>
+</body>
+</html>
