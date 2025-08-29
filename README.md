@@ -38,3 +38,9 @@ It includes a small web interface for viewing the collected data, but its main f
 
 ### Start webserver
 ```python webserver.py```
+<br>
+<br>
+<br>
+<br>
+<br>
+<p align="right">made possible by <code>_.g.a.u.t.a.m._</code> on discord.</p>
