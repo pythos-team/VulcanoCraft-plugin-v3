@@ -15,6 +15,7 @@ It includes a small web interface for viewing the collected data, but its main f
 ---
 
 ## 📂 Repository Structure
+```
 ├── cron.py # Background updater (fetches plugins regularly)
 ├── fetchers/ # Scripts to fetch plugin data from different sources
 ├── images/ # Assets & icons
@@ -23,6 +24,7 @@ It includes a small web interface for viewing the collected data, but its main f
 ├── plugins.json # Stored plugin data
 ├── style.css # Styling for the viewer
 └── webserver.py # Simple webserver for local viewing
+```
 
 ---
 
