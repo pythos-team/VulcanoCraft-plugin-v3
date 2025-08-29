@@ -9,8 +9,7 @@ It includes a small web interface for viewing the collected data, but its main f
 - 🔄 **Automated Updates** – Fetches plugin information at regular intervals.  
 - 📦 **Plugin Data Storage** – All plugins are listed and updated in `plugins.json`.  
 - 🕒 **Scheduler Support** – `cron.py` handles automated background updates.  
-- 🌐 **Simple Viewer** – Minimal HTML/CSS frontend (`index.html`) to quickly browse plugin info.  
-- 🖥️ **Launcher Script** – Start everything with one command using `launcher.py`.  
+- 🌐 **Simple Viewer** – Intuitive HTML/CSS/JS frontend to quickly browse plugin info.    
 
 ---
 
