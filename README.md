@@ -32,9 +32,7 @@ It includes a small web interface for viewing the collected data, but its main f
 - (Optional) Flask or another lightweight web framework if required by `webserver.py`
 
 ### Run Fetcher / Updater
-```bash
-python cron.py```
+```python cron.py```
 
 ### Start webserver
-```bash
-python webserver.py```
+```python webserver.py```
