@@ -31,7 +31,8 @@ It includes a small web interface for viewing the collected data, but its main f
 ## 🛠️ Installation & Usage
 ### Requirements
 - Python 3.9+
-- (Optional) Flask or another lightweight web framework if required by `webserver.py`
+- ```pip install requirements.txt```
+- (optional) ```playwright install```
 
 ### Run Fetcher / Updater
 ```python cron.py```
