@@ -31,7 +31,7 @@ It includes a small web interface for viewing the collected data, but its main f
 ### Requirements
 - Python 3.9+
 - ```pip install requirements.txt```
-- (optional) ```playwright install```
+- ```playwright install```
 
 ### Run Fetcher / Updater
 ```python cron.py```
