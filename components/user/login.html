@@ -31,7 +31,7 @@
                     <div id="loginForm">
                         <h4 class="mb-3">Inloggen</h4>
                         <div class="mb-3">
-                            <input type="text" class="form-control form-control-lg" id="loginUsername" placeholder="Gebruikersnaam of Email">
+                            <input type="text" class="form-control form-control-lg" id="loginUsername" placeholder="Gebruikersnaam">
                         </div>
                         <div class="mb-3">
                             <input type="password" class="form-control form-control-lg" id="loginPassword" placeholder="Wachtwoord">
@@ -48,9 +48,6 @@
                         <h4 class="mb-3">Account Aanmaken</h4>
                         <div class="mb-3">
                             <input type="text" class="form-control form-control-lg" id="registerUsername" placeholder="Gebruikersnaam">
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control form-control-lg" id="registerEmail" placeholder="Email">
                         </div>
                         <div class="mb-3">
                             <input type="password" class="form-control form-control-lg" id="registerPassword" placeholder="Wachtwoord">
@@ -155,13 +152,12 @@
 
         document.getElementById('registerBtn').addEventListener('click', function() {
             const username = document.getElementById('registerUsername').value;
-            const email = document.getElementById('registerEmail').value;
             const password = document.getElementById('registerPassword').value;
             
             fetch('/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ username, password })
             })
             .then(response => response.json())
             .then(data => {

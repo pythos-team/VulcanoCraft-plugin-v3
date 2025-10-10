@@ -164,24 +164,20 @@ def register():
             
         data = request.get_json()
         username = data.get('username', '').strip()
-        email = data.get('email', '').strip()
         password = data.get('password', '')
         
-        if not username or not email or not password:
-            return jsonify({'error': 'Alle velden zijn vereist'}), 400
+        if not username or not password:
+            return jsonify({'error': 'Gebruikersnaam en wachtwoord zijn vereist'}), 400
         
         users = load_users()
         
-        # Check of gebruiker of email al bestaat
+        # Check of gebruiker al bestaat
         if any(u['username'] == username for u in users):
             return jsonify({'error': 'Gebruikersnaam bestaat al'}), 400
-        if any(u.get('email') == email for u in users):
-            return jsonify({'error': 'Email bestaat al'}), 400
         
         # Voeg nieuwe gebruiker toe
         users.append({
             'username': username,
-            'email': email,
             'password': hash_password(password)
         })
         
@@ -202,13 +198,13 @@ def login():
         password = data.get('password', '')
         
         if not username or not password:
-            return jsonify({'error': 'Gebruikersnaam/email en wachtwoord vereist'}), 400
+            return jsonify({'error': 'Gebruikersnaam en wachtwoord vereist'}), 400
         
         users = load_users()
         hashed_password = hash_password(password)
         
-        # Check both username and email
-        user = next((u for u in users if (u['username'] == username or u.get('email', '') == username) and u['password'] == hashed_password), None)
+        # Check username
+        user = next((u for u in users if u['username'] == username and u['password'] == hashed_password), None)
         
         if user:
             session['user'] = user['username']

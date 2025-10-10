@@ -9,15 +9,6 @@
         "owner": "Mohiyo"
     },
     {
-        "url": "https://www.spigotmc.org/resources/hcf-skriptcore.24578/",
-        "title": "HCF SkriptCore",
-        "description": "Small & Simple HCF Core Made In Skript",
-        "author": "Destroid",
-        "icon": "https://www.spigotmc.org/data/resource_icons/24/24578.jpg",
-        "versions": "1.10 1.11 1.12 1.7 1.8 1.9",
-        "owner": "Mohiyo"
-    },
-    {
         "url": "https://www.spigotmc.org/resources/mceew-earthquake-early-warning.104549/",
         "title": "MCEEW - Earthquake Early Warning",
         "description": "A real-time Earthquake Early Warning (EEW) plugin for Minecraft servers.",
@@ -43,5 +34,14 @@
         "icon": "https://www.spigotmc.org/data/resource_icons/27/27812.jpg",
         "versions": "1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.20.6 1.21 1.7 1.8 1.9",
         "owner": "Mohiyo"
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/npvp.129398/",
+        "title": "nPvP",
+        "description": "nPvP – PvP Management Plugin with Region Support",
+        "author": "Tumasov",
+        "icon": "https://www.spigotmc.org/data/resource_icons/129/129398.jpg",
+        "versions": "1.21",
+        "owner": "Cokow"
     }
 ]
