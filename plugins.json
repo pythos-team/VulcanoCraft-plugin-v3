@@ -5,14 +5,16 @@
         "description": "Teleport to your last location after your death",
         "author": "GFelberg",
         "icon": "https://www.spigotmc.org/data/resource_icons/94/94702.jpg",
-        "versions": "1.20 1.20.6 1.21"
+        "versions": "1.20 1.20.6 1.21",
+        "owner": "Mohiyo"
     },
     {
-        "url": "https://modrinth.com/plugin/fancynpcs",
-        "title": "FancyNpcs",
-        "description": "Simple, lightweight and fast NPC plugin using packets",
-        "author": "Oliver",
-        "icon": "https://cdn.modrinth.com/data/EeyAn23L/36f54e5fe22b6d6c23a72ebd589f78531e3ced51_96.webp",
-        "versions": "1.19.3 1.19.4 1.20 1.20.1 1.20.2 1.20.3 1.20.4 1.20.5 1.20.6 1.21 1.21.1 1.21.2 1.21.3 1.21.4 1.21.5 1.21.6 1.21.7 1.21.8"
+        "url": "https://www.spigotmc.org/resources/hcf-skriptcore.24578/",
+        "title": "HCF SkriptCore",
+        "description": "Small & Simple HCF Core Made In Skript",
+        "author": "Destroid",
+        "icon": "https://www.spigotmc.org/data/resource_icons/24/24578.jpg",
+        "versions": "1.10 1.11 1.12 1.7 1.8 1.9",
+        "owner": "Mohiyo"
     }
 ]

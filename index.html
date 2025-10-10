@@ -6,6 +6,8 @@
     <title>Plugin Repository</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <!-- GSAP Animation Library -->
@@ -23,6 +25,8 @@
         <div class="floating-element el-4"></div>
         <div class="floating-element el-5"></div>
     </div>
+
+
 
     <!-- Toevoeg Modal -->
     <div class="modal fade" id="addPluginModal" tabindex="-1" aria-labelledby="addPluginModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -153,14 +157,38 @@
             </h1>
             <p class="lead text-light">Overzicht van alle beschikbare plugins</p>
             
-            <!-- Filter en Zoek Sectie -->
+
+            
+            <!-- Auth buttons -->
+            <div class="btn-container text-center">
+                <div id="authButtons">
+                    <a href="/login-page" class="btn btn-outline-light">
+                        <i class="fas fa-sign-in-alt me-2"></i>Inloggen
+                    </a>
+                </div>
+                <div id="userButtons" style="display: none;">
+                    <span class="text-light me-3">Welkom, <span id="username"></span></span>
+                    <button type="button" class="btn button-creative btn-lg floating-add-btn me-2" data-bs-toggle="modal" data-bs-target="#addPluginModal">
+                        <img src="images/add-icon.png" class="btn-icon-lg" alt="Toevoegen">
+                        Toevoegen
+                    </button>
+                    <button type="button" class="btn btn-outline-light" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt me-2"></i>Uitloggen
+                    </button>
+                </div>
+            </div>
+            
+        </header>
+
+        <!-- Main Content -->
+        <div id="mainContent">
+            <!-- Filter Section -->
             <div class="filters-section mt-4 mb-4">
                 <div class="row justify-content-center">
                     <div class="col-lg-10">
                         <div class="card shadow-sm border-0 filter-card">
                             <div class="card-body p-4">
                                 <div class="row g-3 align-items-end">
-                                    <!-- Zoekbalk -->
                                     <div class="col-md-4">
                                         <label for="searchInput" class="form-label fw-bold">
                                             <img src="images/fetch-icon.png" class="input-icon" alt="Zoeken">
@@ -168,8 +196,6 @@
                                         </label>
                                         <input type="text" class="form-control search-input" id="searchInput" placeholder="Zoek plugins...">
                                     </div>
-                                    
-                                    <!-- Versie Filter -->
                                     <div class="col-md-3">
                                         <label for="versionFilter" class="form-label fw-bold">
                                             <img src="images/version-icon.png" class="input-icon" alt="Versie">
@@ -179,8 +205,6 @@
                                             <option value="">Alle versies</option>
                                         </select>
                                     </div>
-                                    
-                                    <!-- Platform Filters -->
                                     <div class="col-md-3">
                                         <label class="form-label fw-bold">
                                             <img src="images/plugin-repo-icon.png" class="input-icon" alt="Platform">
@@ -201,8 +225,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Reset Knop -->
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-secondary w-100 reset-filters-btn" id="resetFilters">
                                             <img src="images/cancel-icon.png" class="btn-icon" alt="Reset">
@@ -216,22 +238,13 @@
                 </div>
             </div>
             
-            <!-- Toevoegknop -->
-             <div class="btn-container">
-                <button type="button" class="btn button-creative  btn-lg floating-add-btn" data-bs-toggle="modal" data-bs-target="#addPluginModal">
-                <img src="images/add-icon.png" class="btn-icon-lg" alt="Toevoegen">
-                Toevoegen
-            </button>
-             </div>
-            
-        </header>
-
-        <div class="row justify-content-center">
-            <div class="col-xxl-10 col-xl-11 col-lg-12" id="pluginsContainer">
-                <!-- Plugins worden hier dynamisch geladen -->
-                <div class="text-center">
-                    <img src="images/loading-plugins.gif" class="loading-plugins" alt="Plugins laden">
-                    <p class="mt-2">Plugins laden...</p>
+            <div class="row justify-content-center">
+                <div class="col-xxl-10 col-xl-11 col-lg-12" id="pluginsContainer">
+                    <!-- Plugins worden hier dynamisch geladen -->
+                    <div class="text-center">
+                        <img src="images/loading-plugins-icon.gif" class="loading-plugins" alt="Plugins laden">
+                        <p class="mt-2">Plugins laden...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -248,6 +261,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            
+            // Check auth status on load
+            checkAuthStatus();
+            
+            // Load plugins on startup
+            loadPlugins();
             
             const addModal = new bootstrap.Modal(document.getElementById('addPluginModal'));
             const pluginUrlInput = document.getElementById('pluginUrl');
@@ -507,28 +526,87 @@
                 errorMessage.classList.remove('show');
             }
             
-            // Laad plugins bij het opstarten
-            loadPlugins();
+            // Auth event listeners
+            document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+            
+            // Don't load plugins on startup - wait for auth check
+            
+            function checkAuthStatus() {
+                fetch('/auth-status')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.logged_in) {
+                            document.getElementById('authButtons').style.display = 'none';
+                            document.getElementById('userButtons').style.display = 'flex';
+                            document.getElementById('username').textContent = data.username;
+                        } else {
+                            document.getElementById('authButtons').style.display = 'block';
+                            document.getElementById('userButtons').style.display = 'none';
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('authButtons').style.display = 'block';
+                        document.getElementById('userButtons').style.display = 'none';
+                    });
+            }
+            
+
+            
+            function handleLogout() {
+                fetch('/logout', { method: 'POST' })
+                    .then(() => {
+                        checkAuthStatus();
+                        window.location.reload();
+                    })
+                    .catch(() => checkAuthStatus());
+            }
             
             function loadPlugins() {
-                // Haal plugins op van de server
-                fetch('/api/plugins')
+                fetch('/auth-status')
                     .then(response => response.json())
-                    .then(plugins => {
-                        renderPlugins(plugins);
+                    .then(authData => {
+                        if (authData.logged_in) {
+                            // Haal plugins op van de server voor ingelogde gebruiker
+                            fetch('/api/plugins')
+                                .then(response => response.json())
+                                .then(plugins => {
+                                    renderPlugins(plugins);
+                                })
+                                .catch(error => {
+                                    console.error('Fout bij laden plugins:', error);
+                                    showNoPluginsMessage();
+                                });
+                        } else {
+                            showLoginRequiredMessage();
+                        }
                     })
-                    .catch(error => {
-                        console.error('Fout bij laden plugins:', error);
-                        const pluginsContainer = document.getElementById('pluginsContainer');
-                        pluginsContainer.innerHTML = `
-                            <div class="col-12 text-center">
-                                <div class="alert alert-danger d-flex align-items-center justify-content-center" role="alert">
-                                    <img src="images/error-icon.png" class="error-icon me-2" alt="Fout">
-                                    Er is een fout opgetreden bij het laden van de plugins.
-                                </div>
-                            </div>
-                        `;
+                    .catch(() => {
+                        showLoginRequiredMessage();
                     });
+            }
+            
+            function showNoPluginsMessage() {
+                const pluginsContainer = document.getElementById('pluginsContainer');
+                pluginsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
+                            <img src="images/add-icon.png" class="warning-icon me-2" alt="Geen plugins">
+                            Je hebt nog geen plugins toegevoegd. Klik op "Toevoegen" om te beginnen.
+                        </div>
+                    </div>
+                `;
+            }
+            
+            function showLoginRequiredMessage() {
+                const pluginsContainer = document.getElementById('pluginsContainer');
+                pluginsContainer.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="alert alert-warning d-flex align-items-center justify-content-center" role="alert">
+                            <img src="images/warning-icon.png" class="warning-icon me-2" alt="Login vereist">
+                            <a href="/login-page" class="btn btn-primary ms-2">Inloggen om plugins te bekijken</a>
+                        </div>
+                    </div>
+                `;
             }
             
             function renderPlugins(plugins) {
@@ -537,9 +615,9 @@
                 if (plugins.length === 0) {
                     pluginsContainer.innerHTML = `
                     <div class="col-12 text-center">
-                        <div class="alert alert-warning d-flex align-items-center justify-content-center" role="alert">
-                            <img src="images/warning-icon.png" class="warning-icon me-2" alt="Waarschuwing">
-                            Er zijn nog geen plugins beschikbaar.
+                        <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
+                            <img src="images/add-icon.png" class="warning-icon me-2" alt="Geen plugins">
+                            Nog geen plugins beschikbaar.
                         </div>
                     </div>
                     `;
@@ -773,7 +851,7 @@
                         <div class="col-12 text-center">
                             <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
                                 <img src="images/fetch-icon.png" class="warning-icon me-2" alt="Geen resultaten">
-                                Geen plugins gevonden die voldoen aan de filters.
+                                Geen van je plugins voldoen aan de filters.
                             </div>
                         </div>
                     `;
