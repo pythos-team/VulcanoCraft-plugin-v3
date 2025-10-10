@@ -396,50 +396,68 @@
             
             // Ja-knop
             confirmYes.addEventListener('click', function() {
-                const url = pluginUrlInput.value.trim();
-                
-                // Toon loading icon in de Ja-knop
-                const originalContent = confirmYes.innerHTML;
-                confirmYes.innerHTML = '<img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden"> Toevoegen...';
-                confirmYes.disabled = true;
-                
-                // Voeg plugin toe via de server
-                fetch('/add_plugin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: url })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Toon succesbericht
-                        const successAlert = document.createElement('div');
-                        successAlert.className = 'alert alert-success alert-dismissible fade show';
-                        successAlert.innerHTML = `
-                            <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin succesvol toegevoegd!
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        `;
-                        document.querySelector('.container-fluid').prepend(successAlert);
+                // Check if user is logged in
+                fetch('/auth-status')
+                    .then(response => response.json())
+                    .then(authData => {
+                        if (!authData.logged_in) {
+                            showError('Je moet ingelogd zijn om plugins toe te voegen. Ga naar de login pagina.');
+                            return;
+                        }
                         
-                        // Herlaad plugins
-                        loadPlugins();
+                        const url = pluginUrlInput.value.trim();
                         
-                        addModal.hide();
-                    } else {
-                        // Reset knop bij fout
-                        confirmYes.innerHTML = originalContent;
-                        confirmYes.disabled = false;
-                        showError('Fout bij toevoegen: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    // Reset knop bij fout
-                    confirmYes.innerHTML = originalContent;
-                    confirmYes.disabled = false;
-                    showError('Fout bij toevoegen: ' + error);
-                });
+                        // Toon loading icon in de Ja-knop
+                        const originalContent = confirmYes.innerHTML;
+                        confirmYes.innerHTML = '<img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden"> Toevoegen...';
+                        confirmYes.disabled = true;
+                        
+                        // Voeg plugin toe via de server
+                        fetch('/add_plugin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ url: url })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Login vereist');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                // Toon succesbericht
+                                const successAlert = document.createElement('div');
+                                successAlert.className = 'alert alert-success alert-dismissible fade show';
+                                successAlert.innerHTML = `
+                                    <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin succesvol toegevoegd!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                `;
+                                document.querySelector('.container-fluid').prepend(successAlert);
+                                
+                                // Herlaad plugins
+                                loadPlugins();
+                                
+                                addModal.hide();
+                            } else {
+                                // Reset knop bij fout
+                                confirmYes.innerHTML = originalContent;
+                                confirmYes.disabled = false;
+                                showError('Fout bij toevoegen: ' + data.error);
+                            }
+                        })
+                        .catch(error => {
+                            // Reset knop bij fout
+                            confirmYes.innerHTML = originalContent;
+                            confirmYes.disabled = false;
+                            showError('Fout bij toevoegen: ' + error);
+                        });
+                    })
+                    .catch(() => {
+                        showError('Je moet ingelogd zijn om plugins toe te voegen.');
+                    });
             });
             
             // Nee-knop
@@ -565,23 +583,27 @@
                 fetch('/auth-status')
                     .then(response => response.json())
                     .then(authData => {
-                        if (authData.logged_in) {
-                            // Haal plugins op van de server voor ingelogde gebruiker
-                            fetch('/api/plugins')
-                                .then(response => response.json())
-                                .then(plugins => {
-                                    renderPlugins(plugins);
-                                })
-                                .catch(error => {
-                                    console.error('Fout bij laden plugins:', error);
-                                    showNoPluginsMessage();
-                                });
-                        } else {
-                            showLoginRequiredMessage();
-                        }
+                        // Haal alle plugins op voor alle gebruikers
+                        fetch('/api/plugins/public')
+                            .then(response => response.json())
+                            .then(plugins => {
+                                renderPlugins(plugins, authData.logged_in);
+                            })
+                            .catch(error => {
+                                console.error('Fout bij laden plugins:', error);
+                                showNoPluginsMessage();
+                            });
                     })
                     .catch(() => {
-                        showLoginRequiredMessage();
+                        // Fallback: toon alle plugins in read-only mode
+                        fetch('/api/plugins/public')
+                            .then(response => response.json())
+                            .then(plugins => {
+                                renderPlugins(plugins, false);
+                            })
+                            .catch(() => {
+                                showNoPluginsMessage();
+                            });
                     });
             }
             
@@ -609,15 +631,19 @@
                 `;
             }
             
-            function renderPlugins(plugins) {
+            function renderPlugins(plugins, isLoggedIn = false) {
                 const pluginsContainer = document.getElementById('pluginsContainer');
+                const currentUser = isLoggedIn ? document.getElementById('username').textContent : null;
                 
                 if (plugins.length === 0) {
+                    const message = isLoggedIn ? 
+                        'Nog geen plugins beschikbaar.' :
+                        'Nog geen plugins beschikbaar.';
                     pluginsContainer.innerHTML = `
                     <div class="col-12 text-center">
                         <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
                             <img src="images/add-icon.png" class="warning-icon me-2" alt="Geen plugins">
-                            Nog geen plugins beschikbaar.
+                            ${message}
                         </div>
                     </div>
                     `;
@@ -630,6 +656,8 @@
                 plugins.forEach(plugin => {
                     const formattedVersions = formatVersions(plugin.versions || '');
                     const domain = getDomainFromUrl(plugin.url || '');
+                    const ownerInfo = plugin.owner ? `<small class="text-muted ms-2">door ${plugin.owner}</small>` : '';
+                    const canDelete = isLoggedIn && plugin.owner === currentUser;
                     
                     pluginsHtml += `
                     <div class="col-12 mb-4">
@@ -637,13 +665,15 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
-                                    <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}</h5>
+                                    <div>
+                                        <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}${ownerInfo}</h5>
+                                    </div>
                                 </div>
                                 <div>
                                     <span class="domain-badge">${domain}</span>
-                                    <button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                    ${canDelete ? `<button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
                                         <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
-                                    </button>
+                                    </button>` : ''}
                                 </div>
                             </div>
                             <div class="card-body">
@@ -747,12 +777,12 @@
             
             // Overschrijf de renderPlugins functie om filtering te ondersteunen
             const originalRenderPlugins = renderPlugins;
-            renderPlugins = function(plugins) {
+            renderPlugins = function(plugins, isLoggedIn = false) {
                 allPlugins = plugins;
                 filteredPlugins = plugins;
                 populateVersionFilter(plugins);
-                originalRenderPlugins(plugins);
-                setupFilterEventListeners();
+                originalRenderPlugins(plugins, isLoggedIn);
+                setupFilterEventListeners(isLoggedIn);
             };
             
             function populateVersionFilter(plugins) {
@@ -787,28 +817,28 @@
                 });
             }
             
-            function setupFilterEventListeners() {
+            function setupFilterEventListeners(isLoggedIn = false) {
                 const searchInput = document.getElementById('searchInput');
                 const versionFilter = document.getElementById('versionFilter');
                 const platformFilters = document.querySelectorAll('.platform-filter');
                 const resetButton = document.getElementById('resetFilters');
                 
                 // Zoek functionaliteit
-                searchInput.addEventListener('input', debounce(applyFilters, 300));
+                searchInput.addEventListener('input', debounce(() => applyFilters(isLoggedIn), 300));
                 
                 // Versie filter
-                versionFilter.addEventListener('change', applyFilters);
+                versionFilter.addEventListener('change', () => applyFilters(isLoggedIn));
                 
                 // Platform filters
                 platformFilters.forEach(filter => {
-                    filter.addEventListener('change', applyFilters);
+                    filter.addEventListener('change', () => applyFilters(isLoggedIn));
                 });
                 
                 // Reset functionaliteit
-                resetButton.addEventListener('click', resetFilters);
+                resetButton.addEventListener('click', () => resetFilters(isLoggedIn));
             }
             
-            function applyFilters() {
+            function applyFilters(isLoggedIn = false) {
                 const searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
                 const selectedVersion = document.getElementById('versionFilter').value;
                 const selectedPlatforms = Array.from(document.querySelectorAll('.platform-filter:checked')).map(cb => cb.value);
@@ -831,7 +861,7 @@
                     return matchesSearch && matchesVersion && matchesPlatform;
                 });
                 
-                renderFilteredPlugins();
+                renderFilteredPlugins(isLoggedIn);
                 updateResultsCount();
             }
             
@@ -843,15 +873,16 @@
                 return 'unknown';
             }
             
-            function renderFilteredPlugins() {
+            function renderFilteredPlugins(isLoggedIn = false) {
                 const pluginsContainer = document.getElementById('pluginsContainer');
+                const currentUser = isLoggedIn ? document.getElementById('username').textContent : null;
                 
                 if (filteredPlugins.length === 0) {
                     pluginsContainer.innerHTML = `
                         <div class="col-12 text-center">
                             <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
                                 <img src="images/fetch-icon.png" class="warning-icon me-2" alt="Geen resultaten">
-                                Geen van je plugins voldoen aan de filters.
+                                Geen plugins voldoen aan de filters.
                             </div>
                         </div>
                     `;
@@ -864,6 +895,8 @@
                 filteredPlugins.forEach(plugin => {
                     const formattedVersions = formatVersions(plugin.versions || '');
                     const domain = getDomainFromUrl(plugin.url || '');
+                    const ownerInfo = plugin.owner ? `<small class="text-muted ms-2">door ${plugin.owner}</small>` : '';
+                    const canDelete = isLoggedIn && plugin.owner === currentUser;
                     
                     pluginsHtml += `
                     <div class="col-12 mb-4 plugin-card" style="animation: fadeIn 0.6s ease-out ${animationDelay}ms both;">
@@ -871,13 +904,15 @@
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
-                                    <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}</h5>
+                                    <div>
+                                        <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}${ownerInfo}</h5>
+                                    </div>
                                 </div>
                                 <div>
                                     <span class="domain-badge">${domain}</span>
-                                    <button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                    ${canDelete ? `<button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
                                         <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
-                                    </button>
+                                    </button>` : ''}
                                 </div>
                             </div>
                             <div class="card-body">
@@ -957,13 +992,13 @@
                 }
             }
             
-            function resetFilters() {
+            function resetFilters(isLoggedIn = false) {
                 document.getElementById('searchInput').value = '';
                 document.getElementById('versionFilter').value = '';
                 document.querySelectorAll('.platform-filter').forEach(cb => cb.checked = true);
                 
                 filteredPlugins = allPlugins;
-                renderFilteredPlugins();
+                renderFilteredPlugins(isLoggedIn);
                 updateResultsCount();
                 
                 // Animatie voor reset knop

@@ -148,6 +148,12 @@ def api_plugins():
     plugins = get_user_plugins(username)
     return jsonify(plugins)
 
+@app.route('/api/plugins/public')
+def api_plugins_public():
+    """API endpoint voor alle plugins data (publiek toegankelijk)"""
+    plugins = load_plugins()
+    return jsonify(plugins)
+
 @app.route('/register', methods=['POST'])
 def register():
     """Registreer nieuwe gebruiker"""
@@ -308,7 +314,6 @@ def admin_update_settings():
     return jsonify({'error': 'Fout bij opslaan'}), 500
 
 @app.route('/fetch_plugin', methods=['POST'])
-@require_login
 def fetch_plugin():
     """Haal plugin data op voor een gegeven URL"""
     try:
