@@ -7,7 +7,7 @@ def run_script(script_name, url):
     """Voert een Python script uit uit de fetchers map met de gegeven URL en retourneert de output"""
     try:
         result = subprocess.run(
-            [sys.executable, f'fetchers/{script_name}.py', url],
+            ['python', f'fetchers/{script_name}.py', url],
             capture_output=True,
             text=True,
             check=True
