@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+    <div id="loginForm" class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <h3><i class="fas fa-shield-alt me-2"></i>Admin Login</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="adminLoginForm">
+                            <div class="mb-3">
+                                <input type="text" class="form-control" id="adminUsername" placeholder="Username" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="password" class="form-control" id="adminPassword" placeholder="Password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                        </form>
+                        <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="container mt-5" style="display: none;">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3><i class="fas fa-cog me-2"></i>Admin Panel - <span id="adminRole"></span></h3>
+                        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-5">
+                            <h4><i class="fas fa-sliders-h me-2"></i>Instellingen</h4>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="registrationToggle">
+                                <label class="form-check-label" for="registrationToggle">Registratie toestaan</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-5" id="userManagement">
+                            <h4><i class="fas fa-users me-2"></i>Gebruikers</h4>
+                            <div class="row" id="usersGrid">
+                                <div class="col-12 text-center"><p>Laden...</p></div>
+                            </div>
+                        </div>
+
+                        <div id="pluginManagement">
+                            <h4><i class="fas fa-puzzle-piece me-2"></i>Plugins</h4>
+                            <div class="row" id="pluginsGrid">
+                                <div class="col-12 text-center"><p>Laden...</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentRole = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminSession();
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                adminLogin();
+            });
+        });
+        
+        function checkAdminSession() {
+            fetch('/admin/check-session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logged_in) {
+                        currentRole = data.role;
+                        showAdminPanel();
+                    }
+                });
+        }
+
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+
+            fetch('/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentRole = data.role;
+                    showAdminPanel();
+                } else {
+                    showLoginError(data.error);
+                }
+            })
+            .catch(() => showLoginError('Login failed'));
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminRole').textContent = currentRole.toUpperCase();
+            loadSettings();
+            loadUsers();
+            loadPlugins();
+            setupEventListeners();
+        }
+
+        function logout() {
+            fetch('/admin/logout', { method: 'POST' })
+            .then(() => {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('adminUsername').value = '';
+                document.getElementById('adminPassword').value = '';
+            });
+        }
+
+        function showLoginError(message) {
+            const errorDiv = document.getElementById('loginError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        function setupEventListeners() {
+            document.getElementById('registrationToggle').addEventListener('change', function() {
+                const enabled = this.checked;
+                fetch('/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ registration_enabled: enabled })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        alert('Fout bij opslaan instellingen');
+                        this.checked = !enabled;
+                    }
+                });
+            });
+        }
+
+        function loadSettings() {
+            fetch('/admin/settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('registrationToggle').checked = data.registration_enabled;
+                });
+        }
+
+        function loadUsers() {
+            fetch('/admin/users')
+                .then(response => response.json())
+                .then(users => {
+                    const grid = document.getElementById('usersGrid');
+                    grid.innerHTML = users.map(user => `
+                        <div class="col-md-4 col-lg-3 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-user-circle" style="font-size: 3rem; color: #6c757d;"></i>
+                                    </div>
+                                    <h6 class="card-title">${user.username}</h6>
+                                    <div class="mb-3">
+                                        <span class="badge ${getRoleBadgeClass(user.role)}">${user.role}</span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <span class="badge bg-primary">
+                                            <i class="fas fa-puzzle-piece me-1"></i>${user.plugin_count} plugins
+                                        </span>
+                                    </div>
+                                    ${currentRole === 'admin' && user.username !== 'admin' ? `
+                                        <select class="form-select form-select-sm mb-2" onchange="changeRole('${user.username}', this.value)">
+                                            <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
+                                            <option value="co-admin" ${user.role === 'co-admin' ? 'selected' : ''}>Co-Admin</option>
+                                            <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
+                                        </select>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">
+                                            <i class="fas fa-trash me-1"></i>Verwijderen
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function loadPlugins() {
+            fetch('/admin/plugins')
+                .then(response => response.json())
+                .then(plugins => {
+                    const grid = document.getElementById('pluginsGrid');
+                    grid.innerHTML = plugins.map(plugin => `
+                        <div class="col-md-6 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <img src="${plugin.icon || '/images/plugin-placeholder.png'}" style="width: 40px; height: 40px; margin-right: 10px;" alt="icon">
+                                        <div>
+                                            <h6 class="mb-0">${plugin.title}</h6>
+                                            <small class="text-muted">door ${plugin.owner || 'Onbekend'}</small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-danger btn-sm" onclick="deletePlugin('${plugin.url}', '${plugin.title}')">
+                                        <i class="fas fa-trash me-1"></i>Verwijderen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                });
+        }
+
+        function getRoleBadgeClass(role) {
+            if (role === 'admin') return 'bg-danger';
+            if (role === 'co-admin') return 'bg-warning';
+            return 'bg-secondary';
+        }
+
+        function changeRole(username, newRole) {
+            fetch(`/admin/users/${username}/role`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ role: newRole })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadUsers();
+                } else {
+                    alert('Fout bij wijzigen rol');
+                }
+            });
+        }
+
+        function deleteUser(username) {
+            if (confirm(`Weet je zeker dat je gebruiker "${username}" wilt verwijderen?`)) {
+                fetch(`/admin/users/${username}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadUsers();
+                        } else {
+                            alert('Fout bij verwijderen gebruiker');
+                        }
+                    });
+            }
+        }
+
+        function deletePlugin(url, title) {
+            if (confirm(`Weet je zeker dat je plugin "${title}" wilt verwijderen?`)) {
+                fetch(`/admin/plugins/${encodeURIComponent(url)}`, { method: 'DELETE' })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadPlugins();
+                        } else {
+                            alert('Fout bij verwijderen plugin');
+                        }
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
