@@ -16,41 +16,51 @@ def load_plugins():
         print(f"Fout bij het laden van plugins: {e}")
         return []
 
-def update_plugin(url):
-    """Voer launcher.py uit voor een specifieke plugin URL met confirm"""
+def update_plugin(url, owner=None):
+    """Voer launcher.py uit voor een specifieke plugin URL"""
     try:
         print(f"Bijwerken plugin: {url}")
         
-        # Gebruik dezelfde Python interpreter als het huidige proces
         python_executable = sys.executable
         
-        # Voer launcher.py uit met confirm parameter
+        # Voer launcher.py uit zonder confirm om alleen data op te halen
         result = subprocess.run(
-            [python_executable, 'launcher.py', url, 'confirm'],
+            [python_executable, 'launcher.py', url],
             capture_output=True,
             text=True,
             check=True,
-            timeout=300  # Timeout na 5 minuten
+            timeout=300
         )
         
-        # Toon de output van launcher.py
-        if result.stdout:
-            print(result.stdout)
+        # Parse de JSON output
+        plugin_data = json.loads(result.stdout)
+        
+        # Behoud owner informatie
+        if owner:
+            plugin_data['owner'] = owner
         
         print(f"Plugin succesvol bijgewerkt: {url}")
-        return True
+        return plugin_data
         
     except subprocess.CalledProcessError as e:
         print(f"Fout bij bijwerken plugin {url}:")
         print(f"Error output: {e.stderr}")
-        if e.stdout:
-            print(f"Output: {e.stdout}")
-        return False
+        return None
     except subprocess.TimeoutExpired:
         print(f"Timeout bij bijwerken plugin {url}")
-        return False
+        return None
     except Exception as e:
         print(f"Onverwachte fout bij bijwerken plugin {url}: {e}")
+        return None
+
+def save_plugins(plugins):
+    """Sla plugins op in het JSON bestand"""
+    try:
+        with open('plugins.json', 'w', encoding='utf-8') as f:
+            json.dump(plugins, f, indent=4, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"Fout bij het opslaan van plugins: {e}")
         return False
 
 def main():
@@ -71,16 +81,30 @@ def main():
                 print(f"Start bijwerken van {len(plugins)} plugin(s)")
                 
                 # Bijwerken van elke plugin
+                updated_plugins = []
                 success_count = 0
+                
                 for plugin in plugins:
                     url = plugin.get('url')
+                    owner = plugin.get('owner')
+                    
                     if url:
-                        if update_plugin(url):
+                        updated_data = update_plugin(url, owner)
+                        if updated_data:
+                            updated_plugins.append(updated_data)
                             success_count += 1
+                        else:
+                            # Behoud originele data bij fout
+                            updated_plugins.append(plugin)
                     else:
                         print("Plugin zonder URL gevonden, overslaan...")
+                        updated_plugins.append(plugin)
                 
-                print(f"Bijwerken voltooid: {success_count}/{len(plugins)} plugins succesvol bijgewerkt")
+                # Sla bijgewerkte plugins op
+                if save_plugins(updated_plugins):
+                    print(f"Bijwerken voltooid: {success_count}/{len(plugins)} plugins succesvol bijgewerkt")
+                else:
+                    print("Fout bij opslaan van bijgewerkte plugins")
             
             # Wacht 1 uur tot volgende update
             next_run = datetime.now() + timedelta(hours=1)

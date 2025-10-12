@@ -5,14 +5,40 @@
         "description": "Teleport to your last location after your death",
         "author": "GFelberg",
         "icon": "https://www.spigotmc.org/data/resource_icons/94/94702.jpg",
-        "versions": "1.20 1.20.6 1.21"
+        "versions": "1.20 1.20.6 1.21",
+        "owner": "Mohiyo"
     },
     {
-        "url": "https://modrinth.com/plugin/fancynpcs",
-        "title": "FancyNpcs",
-        "description": "Simple, lightweight and fast NPC plugin using packets",
-        "author": "Oliver",
-        "icon": "https://cdn.modrinth.com/data/EeyAn23L/36f54e5fe22b6d6c23a72ebd589f78531e3ced51_96.webp",
-        "versions": "1.19.3 1.19.4 1.20 1.20.1 1.20.2 1.20.3 1.20.4 1.20.5 1.20.6 1.21 1.21.1 1.21.2 1.21.3 1.21.4 1.21.5 1.21.6 1.21.7 1.21.8"
+        "url": "https://www.spigotmc.org/resources/mceew-earthquake-early-warning.104549/",
+        "title": "MCEEW - Earthquake Early Warning",
+        "description": "A real-time Earthquake Early Warning (EEW) plugin for Minecraft servers.",
+        "author": "Amiya233",
+        "icon": "https://www.spigotmc.org//static.spigotmc.org/styles/spigot/xenresource/resource_icon.png",
+        "versions": ""
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/antimobaura.27812/",
+        "title": "AntiMobAura",
+        "description": "They wont know until there banned.",
+        "author": "Destroid",
+        "icon": "https://www.spigotmc.org/data/resource_icons/27/27812.jpg",
+        "versions": "1.10 1.11 1.12 1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.20.6 1.21 1.7 1.8 1.9"
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/npvp.129398/",
+        "title": "nPvP",
+        "description": "nPvP – PvP Management Plugin with Region Support",
+        "author": "Tumasov",
+        "icon": "https://www.spigotmc.org/data/resource_icons/129/129398.jpg",
+        "versions": "1.21"
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/1-21-crazyeggs.111676/",
+        "title": "[1.21] CrazyEggs",
+        "description": "Eggs that kill",
+        "author": "Choketa",
+        "icon": "https://www.spigotmc.org/data/resource_icons/111/111676.jpg",
+        "versions": "1.20 1.20.6 1.21",
+        "owner": "Zomb"
     }
 ]
