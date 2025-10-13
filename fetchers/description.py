@@ -22,15 +22,13 @@ def get_spigot_description(url):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url)
+            page.goto(url, wait_until='domcontentloaded')
 
             try:
-                # Wait for and extract the description from the tagline
-                page.wait_for_selector("p.tagline", timeout=10000)
+                page.wait_for_selector("p.tagline", timeout=3000)
                 description_element = page.query_selector("p.tagline")
                 description = description_element.inner_text().strip() if description_element else None
             except Exception:
-                # If the tagline isn't found, try to get the meta description
                 description_element = page.query_selector('meta[name="description"]')
                 if description_element:
                     description = description_element.get_attribute("content")
@@ -89,7 +87,7 @@ def main():
 
     platform, identifier = detect_platform(args.url)
     if not platform:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if platform == "modrinth":
@@ -99,11 +97,11 @@ def main():
     elif platform == "hangar":
         description = get_hangar_description(identifier)
     else:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if description is None:
-        print("Invalid URL")
+        print("", file=sys.stderr)
         sys.exit(1)
     else:
         print(description)

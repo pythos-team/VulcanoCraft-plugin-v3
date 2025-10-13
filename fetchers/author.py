@@ -42,13 +42,11 @@ def get_spigot_author(url):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url)
+            page.goto(url, wait_until='domcontentloaded')
 
             try:
-                # Methode 1: Zoek specifiek naar de author link in de sidebar
-                page.wait_for_selector('.sidebar .section .secondaryContent', timeout=10000)
+                page.wait_for_selector('.sidebar .section .secondaryContent', timeout=3000)
                 
-                # Zoek naar de author link met specifieke class of attribuut
                 author_selectors = [
                     '.author a',
                     '.secondaryContent a[href*="/members/"]',
@@ -58,30 +56,28 @@ def get_spigot_author(url):
                 ]
                 
                 for selector in author_selectors:
-                    try:
-                        author_link = page.query_selector(selector)
-                        if author_link:
-                            author_name = author_link.inner_text().strip()
-                            if author_name and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
-                                return author_name
-                    except:
-                        continue
+                    author_link = page.query_selector(selector)
+                    if author_link:
+                        author_name = author_link.inner_text().strip()
+                        if author_name and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
+                            browser.close()
+                            return author_name
                 
-                # Methode 2: Zoek in alle links voor auteur informatie
                 all_links = page.query_selector_all('a')
                 for link in all_links:
                     href = link.get_attribute('href') or ''
                     if ('/members/' in href or '/authors/' in href) and not ('/resources/' in href):
                         author_name = link.inner_text().strip()
                         if author_name and len(author_name) > 2 and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
+                            browser.close()
                             return author_name
                 
+                browser.close()
                 return None
                 
             except Exception:
-                return None
-            finally:
                 browser.close()
+                return None
     except Exception:
         return None
 
@@ -132,7 +128,7 @@ def main():
 
     platform, identifier = detect_platform(args.url)
     if not platform:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if platform == "modrinth":
@@ -142,11 +138,11 @@ def main():
     elif platform == "hangar":
         author = get_hangar_author(identifier)
     else:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if author is None:
-        print("Invalid URL")
+        print("", file=sys.stderr)
         sys.exit(1)
     else:
         print(author)

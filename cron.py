@@ -33,6 +33,10 @@ def update_plugin(url, owner=None):
         )
         
         # Parse de JSON output
+        if not result.stdout.strip():
+            print(f"Geen output ontvangen voor plugin {url}")
+            return None
+            
         plugin_data = json.loads(result.stdout)
         
         # Behoud owner informatie
@@ -48,6 +52,10 @@ def update_plugin(url, owner=None):
         return None
     except subprocess.TimeoutExpired:
         print(f"Timeout bij bijwerken plugin {url}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"Ongeldige JSON output voor plugin {url}: {e}")
+        print(f"Output was: {result.stdout[:200]}...")
         return None
     except Exception as e:
         print(f"Onverwachte fout bij bijwerken plugin {url}: {e}")
@@ -95,6 +103,7 @@ def main():
                             success_count += 1
                         else:
                             # Behoud originele data bij fout
+                            print(f"Originele data behouden voor: {url}")
                             updated_plugins.append(plugin)
                     else:
                         print("Plugin zonder URL gevonden, overslaan...")

@@ -22,24 +22,22 @@ def get_spigot_title(url):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url)
+            page.goto(url, wait_until='domcontentloaded')
 
             try:
-                # Wait for and extract the title from the H1 element with class resource-title__name
-                page.wait_for_selector("h1.resource-title__name", timeout=10000)
+                page.wait_for_selector("h1.resource-title__name", timeout=3000)
                 title_element = page.query_selector("h1.resource-title__name")
                 
                 if title_element:
-                    # Extract just the text part, excluding the version number
                     full_text = title_element.inner_text().strip()
-                    # Remove the version number (text after the last space)
                     title = full_text.rsplit(' ', 1)[0]
+                    browser.close()
                     return title
             except Exception:
-                # Fallback: try to get the title from the page title
                 title = page.title()
                 if title and "|" in title:
                     title = title.split("|")[0].strip()
+                browser.close()
                 return title
 
             browser.close()
@@ -94,7 +92,7 @@ def main():
 
     platform, identifier = detect_platform(args.url)
     if not platform:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if platform == "modrinth":
@@ -104,11 +102,11 @@ def main():
     elif platform == "hangar":
         title = get_hangar_title(identifier)
     else:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if title is None:
-        print("Invalid URL")
+        print("", file=sys.stderr)
         sys.exit(1)
     else:
         print(title)

@@ -14,7 +14,7 @@ def run_script(script_name, url):
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Fout bij uitvoeren fetchers/{script_name}.py: {e}")
+        print(f"Fout bij uitvoeren fetchers/{script_name}.py: {e}", file=sys.stderr)
         return ""
 
 def get_plugin_data(url):

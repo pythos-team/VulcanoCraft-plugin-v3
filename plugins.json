@@ -10,10 +10,10 @@
     },
     {
         "url": "https://www.spigotmc.org/resources/mceew-earthquake-early-warning.104549/",
-        "title": "MCEEW - Earthquake Early Warning",
+        "title": "",
         "description": "A real-time Earthquake Early Warning (EEW) plugin for Minecraft servers.",
-        "author": "Amiya233",
-        "icon": "https://www.spigotmc.org//static.spigotmc.org/styles/spigot/xenresource/resource_icon.png",
+        "author": "",
+        "icon": "",
         "versions": ""
     },
     {
@@ -39,6 +39,33 @@
         "author": "Choketa",
         "icon": "https://www.spigotmc.org/data/resource_icons/111/111676.jpg",
         "versions": "1.20 1.20.6 1.21",
+        "owner": "Zomb"
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/requests.129472/",
+        "title": "Requests",
+        "description": "API for your minecraft server",
+        "author": "theMackabu",
+        "icon": "https://www.spigotmc.org//static.spigotmc.org/styles/spigot/xenresource/resource_icon.png",
+        "versions": "1.21",
+        "owner": "Mohiyo"
+    },
+    {
+        "url": "https://www.spigotmc.org/resources/gravestonesplus.95132/",
+        "title": "GraveStonesPlus",
+        "description": "Create a grave when a player dies",
+        "author": "BenCodez",
+        "icon": "https://www.spigotmc.org//static.spigotmc.org/styles/spigot/xenresource/resource_icon.png",
+        "versions": "1.13 1.14 1.15 1.16 1.17 1.18 1.19 1.20 1.20.6 1.21",
+        "owner": "Zomb"
+    },
+    {
+        "author": "gamerogg14",
+        "description": "Show popup messages to any player (Admin Command Only)",
+        "icon": "https://www.spigotmc.org/data/resource_icons/129/129470.jpg",
+        "title": "Popup Plugin",
+        "url": "https://www.spigotmc.org/resources/popup-plugin.129470/",
+        "versions": "",
         "owner": "Zomb"
     }
 ]
