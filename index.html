@@ -172,6 +172,9 @@
                         <img src="images/add-icon.png" class="btn-icon-lg" alt="Toevoegen">
                         Toevoegen
                     </button>
+                    <a href="/admin" class="btn btn-outline-warning me-2" id="adminBtn" style="display: none;">
+                        <i class="fas fa-cog me-2"></i>Admin
+                    </a>
                     <button type="button" class="btn btn-outline-light" id="logoutBtn">
                         <i class="fas fa-sign-out-alt me-2"></i>Uitloggen
                     </button>
@@ -281,6 +284,7 @@
             
             // Huidige plugin die wordt verwijderd
             let currentDeleteUrl = '';
+            let cachedPluginData = null;
             
             // Verberg error message bij opstarten
             hideError();
@@ -292,6 +296,7 @@
                 step3.style.display = 'none';
                 hideError();
                 pluginUrlInput.value = '';
+                cachedPluginData = null;
                 
                 // Toon de knoppen weer
                 document.getElementById('fetchButton').style.display = 'inline-block';
@@ -337,6 +342,7 @@
                     return response.json();
                 })
                 .then(plugin => {
+                    cachedPluginData = plugin;
                     // Verberg laadanimatie
                     step2.style.display = 'none';
                     
@@ -405,20 +411,18 @@
                             return;
                         }
                         
-                        const url = pluginUrlInput.value.trim();
-                        
                         // Toon loading icon in de Ja-knop
                         const originalContent = confirmYes.innerHTML;
                         confirmYes.innerHTML = '<img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden"> Toevoegen...';
                         confirmYes.disabled = true;
                         
-                        // Voeg plugin toe via de server
+                        // Voeg plugin toe via de server met cached data
                         fetch('/add_plugin', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ url: url })
+                            body: JSON.stringify({ plugin_data: cachedPluginData })
                         })
                         .then(response => {
                             if (!response.ok) {
@@ -557,6 +561,9 @@
                             document.getElementById('authButtons').style.display = 'none';
                             document.getElementById('userButtons').style.display = 'flex';
                             document.getElementById('username').textContent = data.username;
+                            if (data.role === 'admin' || data.role === 'co-admin') {
+                                document.getElementById('adminBtn').style.display = 'inline-block';
+                            }
                         } else {
                             document.getElementById('authButtons').style.display = 'block';
                             document.getElementById('userButtons').style.display = 'none';
@@ -658,13 +665,17 @@
                     const domain = getDomainFromUrl(plugin.url || '');
                     const ownerInfo = plugin.owner ? `<small class="text-muted ms-2">door ${plugin.owner}</small>` : '';
                     const canDelete = isLoggedIn && (userRole === 'admin' || userRole === 'co-admin' || plugin.owner === currentUser);
+                    const firstLetter = (plugin.title || 'P')[0].toUpperCase();
+                    const iconHtml = plugin.icon ? 
+                        `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div class="plugin-icon-letter me-3" style="display:none;">${firstLetter}</div>` : 
+                        `<div class="plugin-icon-letter me-3">${firstLetter}</div>`;
                     
                     pluginsHtml += `
                     <div class="col-12 mb-4">
                         <div class="card h-100 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
+                                    ${iconHtml}
                                     <div>
                                         <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}${ownerInfo}</h5>
                                     </div>
@@ -897,13 +908,17 @@
                     const domain = getDomainFromUrl(plugin.url || '');
                     const ownerInfo = plugin.owner ? `<small class="text-muted ms-2">door ${plugin.owner}</small>` : '';
                     const canDelete = isLoggedIn && (userRole === 'admin' || userRole === 'co-admin' || plugin.owner === currentUser);
+                    const firstLetter = (plugin.title || 'P')[0].toUpperCase();
+                    const iconHtml = plugin.icon ? 
+                        `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"><div class="plugin-icon-letter me-3" style="display:none;">${firstLetter}</div>` : 
+                        `<div class="plugin-icon-letter me-3">${firstLetter}</div>`;
                     
                     pluginsHtml += `
                     <div class="col-12 mb-4 plugin-card" style="animation: fadeIn 0.6s ease-out ${animationDelay}ms both;">
                         <div class="card h-100 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    ${plugin.icon ? `<img src="${plugin.icon}" alt="${plugin.title} icon" class="plugin-icon me-3">` : '<img src="images/plugin-placeholder.png" class="plugin-icon me-3" alt="Plugin icoon">'}
+                                    ${iconHtml}
                                     <div>
                                         <h5 class="card-title mb-0">${plugin.title || 'Geen titel'}${ownerInfo}</h5>
                                     </div>

@@ -414,21 +414,11 @@ def add_plugin():
     """Voeg een plugin toe aan de repository"""
     try:
         data = request.get_json()
-        url = data.get('url')
+        plugin_data = data.get('plugin_data')
         
-        if not url:
-            return jsonify({'error': 'Geen URL opgegeven'}), 400
+        if not plugin_data:
+            return jsonify({'error': 'Geen plugin data opgegeven'}), 400
         
-        # Voer launcher.py uit om plugin data op te halen
-        result = subprocess.run(
-            [sys.executable, 'launcher.py', url],
-            capture_output=True,
-            text=True,
-            check=True
-        )
-        
-        # Parse plugin data en voeg toe aan gebruiker
-        plugin_data = json_module.loads(result.stdout)
         username = session['user']
         
         if add_user_plugin(username, plugin_data):
@@ -436,8 +426,6 @@ def add_plugin():
         else:
             return jsonify({'error': 'Fout bij opslaan plugin'}), 500
         
-    except subprocess.CalledProcessError as e:
-        return jsonify({'error': f'Fout bij toevoegen plugin: {e.stderr}'}), 500
     except Exception as e:
         return jsonify({'error': f'Onverwachte fout: {str(e)}'}), 500
 

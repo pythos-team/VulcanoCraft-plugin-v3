@@ -41,10 +41,10 @@ def get_spigot_game_versions(url):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url)
+            page.goto(url, wait_until='domcontentloaded')
 
             try:
-                page.wait_for_selector("dl.customResourceFieldmc_versions ul.plainList li a", timeout=10000)
+                page.wait_for_selector("dl.customResourceFieldmc_versions ul.plainList li a", timeout=3000)
                 elements = page.query_selector_all("dl.customResourceFieldmc_versions ul.plainList li a")
                 versions = [el.inner_text().strip() for el in elements]
             except Exception:
@@ -125,7 +125,7 @@ def main():
 
     platform, identifier = detect_platform(args.url)
     if not platform:
-        print("ongeldige url")
+        print("ongeldige url", file=sys.stderr)
         sys.exit(1)
 
     if platform == "modrinth":
@@ -135,17 +135,17 @@ def main():
     elif platform == "hangar":
         game_versions = get_hangar_game_versions(identifier)
     else:
-        print("ongeldige url")
+        print("ongeldige url", file=sys.stderr)
         sys.exit(1)
 
     # Als er een fout optreedt bij het ophalen van versies, beschouw dit als ongeldige URL
     if game_versions is None:
-        print("ongeldige url")
+        print("", file=sys.stderr)
         sys.exit(1)
     elif game_versions:
         print(" ".join(game_versions))
     else:
-        print("Geen ondersteunde serverversies gevonden voor dit platform.")
+        print("")
 
 if __name__ == "__main__":
     main()

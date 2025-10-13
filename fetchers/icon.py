@@ -27,35 +27,32 @@ def get_spigot_icon(url):
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
-            page.goto(url)
+            page.goto(url, wait_until='domcontentloaded')
 
             try:
-                # Specifiek zoeken naar de resourceIcon zoals in de afbeelding
-                page.wait_for_selector("img.resourceIcon", timeout=10000)
+                page.wait_for_selector("img.resourceIcon", timeout=3000)
                 icon_element = page.query_selector("img.resourceIcon")
                 
                 if icon_element:
                     icon_url = icon_element.get_attribute("src")
                     if icon_url:
-                        # Verwijder query parameters (alles na .jpg, .png, etc.)
                         if '?' in icon_url:
                             icon_url = icon_url.split('?')[0]
                         
-                        # Make sure the URL is absolute
                         if icon_url.startswith("http"):
+                            browser.close()
                             return icon_url
                         else:
-                            # Convert relative URL to absolute
                             parsed_base = urlparse(url)
-                            # Voor SpigotMC icons die beginnen met data/
                             if icon_url.startswith("data/"):
+                                browser.close()
                                 return f"https://www.spigotmc.org/{icon_url}"
                             else:
+                                browser.close()
                                 return f"{parsed_base.scheme}://{parsed_base.netloc}{icon_url}"
             except Exception:
-                # Fallback: probeer andere common selectors
                 try:
-                    page.wait_for_selector("img.resource-icon, .resource-image img", timeout=5000)
+                    page.wait_for_selector("img.resource-icon, .resource-image img", timeout=2000)
                     icon_element = page.query_selector("img.resource-icon, .resource-image img")
                     if icon_element:
                         icon_url = icon_element.get_attribute("src")
@@ -63,19 +60,21 @@ def get_spigot_icon(url):
                             if '?' in icon_url:
                                 icon_url = icon_url.split('?')[0]
                             if icon_url.startswith("http"):
+                                browser.close()
                                 return icon_url
                             else:
                                 parsed_base = urlparse(url)
                                 if icon_url.startswith("data/"):
+                                    browser.close()
                                     return f"https://www.spigotmc.org/{icon_url}"
                                 else:
+                                    browser.close()
                                     return f"{parsed_base.scheme}://{parsed_base.netloc}{icon_url}"
                 except:
                     pass
                 
-                return None
-            finally:
                 browser.close()
+                return None
     except Exception:
         return None
 
@@ -133,7 +132,7 @@ def main():
 
     platform, identifier = detect_platform(args.url)
     if not platform:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if platform == "modrinth":
@@ -143,11 +142,11 @@ def main():
     elif platform == "hangar":
         icon_url = get_hangar_icon(identifier)
     else:
-        print("Invalid URL")
+        print("Invalid URL", file=sys.stderr)
         sys.exit(1)
 
     if icon_url is None:
-        print("No icon found")
+        print("", file=sys.stderr)
         sys.exit(1)
     else:
         print(icon_url)
