@@ -74,7 +74,7 @@
         "description": "Spice up your Halloween!. Download Spooky Decorations by PixlStudios, with over 2.7K+ downloads on CurseForge",
         "author": "PixlStudios",
         "icon": "https://media.forgecdn.net/avatars/thumbnails/1094/599/64/64/638639283257529892.png",
-        "versions": "1.0 1.0716 1.1046 1.15 1.1760807439 1.192 1.289.1 1.2965 1.3117 1.4477 1.6103 1.6179 1.6361 1.6508 1.76172 1.8458 1.8663 1.9442 1.9592 1.9725",
+        "versions": "",
         "owner": "Mohiyo"
     },
     {
@@ -92,7 +92,7 @@
         "description": "Adds faster Furnaces, Blast Furnaces and Smokers!. Download Iron Smelters by Jaredlll08, with over 1.6K+ downloads on CurseForge",
         "author": "Jaredlll08",
         "icon": "https://media.forgecdn.net/avatars/thumbnails/1446/771/64/64/638938497367312557.png",
-        "versions": "1.0 1.0716 1.1046 1.15 1.192 1.289.1 1.2965 1.3117 1.4477 1.6 1.6103 1.6179 1.6361 1.6508 1.76172 1.8458 1.8663 1.9442 1.9592 1.9725",
+        "versions": "",
         "owner": "Mohiyo"
     },
     {
@@ -101,25 +101,43 @@
         "description": "Adds roaming pillager caravans with biome-themed loot and guarded convoys. Download Pillager Caravans by Obscuria, with over 15.5K+ downloads on CurseForge",
         "author": "Obscuria",
         "icon": "https://media.forgecdn.net/avatars/thumbnails/1462/601/64/64/638949345921396516.png",
-        "versions": "1.0 1.0716 1.1046 1.15 1.192 1.289.1 1.2965 1.3117 1.4477 1.6103 1.6179 1.6361 1.6508 1.76172 1.8458 1.8663 1.9442 1.9592 1.9725",
+        "versions": "",
         "owner": "Mohiyo"
     },
     {
-        "author": "Lupin",
-        "description": "Enjoy an exciting game of Minecraft surrounded by Pokemons, Quests and much more!. Download Immersive Pixelmon - A New Pokemon Era (with Distant Horizons & Quests) by Lupin, with over 12.7K+ downloads on CurseForge",
-        "icon": "https://media.forgecdn.net/avatars/thumbnails/1344/889/64/64/638874109134852383.png",
-        "title": "Immersive Pixelmon - A New Pokemon Era (with Distant Horizons & Quests)",
         "url": "https://www.curseforge.com/minecraft/modpacks/immersive-pixelmon-renewed",
-        "versions": "1.0 1.0716 1.1046 1.192 1.289.1 1.2965 1.3117 1.4477 1.6103 1.6179 1.6361 1.6508 1.76172 1.8458 1.8663 1.9442 1.9592 1.9725",
+        "title": "Immersive Pixelmon - A New Pokemon Era (with Distant Horizons & Quests)",
+        "description": "Enjoy an exciting game of Minecraft surrounded by Pokemons, Quests and much more!. Download Immersive Pixelmon - A New Pokemon Era (with Distant Horizons & Quests) by Lupin, with over 12.7K+ downloads on CurseForge",
+        "author": "Lupin",
+        "icon": "https://media.forgecdn.net/avatars/thumbnails/1344/889/64/64/638874109134852383.png",
+        "versions": "",
         "owner": "Mohiyo"
     },
     {
-        "author": "ScratcherNoobYT",
-        "description": "Haz que tus jugadores se sientan seguros. (MIRAR CONFIGURACION)",
-        "icon": "https://www.spigotmc.org/data/resource_icons/129/129545.jpg",
-        "title": "SecureKids[IA]",
         "url": "https://www.spigotmc.org/resources/securekids-ia.129545/",
+        "title": "SecureKids[IA]",
+        "description": "Haz que tus jugadores se sientan seguros. (MIRAR CONFIGURACION)",
+        "author": "ScratcherNoobYT",
+        "icon": "https://www.spigotmc.org/data/resource_icons/129/129545.jpg",
         "versions": "1.21",
+        "owner": "Mohiyo"
+    },
+    {
+        "author": "Kaworru",
+        "description": "Build, craft and innovate with a mix of scrapyard engineering, neon-powered machinery and urban workshop tools.",
+        "icon": "https://media.forgecdn.net/avatars/thumbnails/1477/261/256/256/638959016207095146.png",
+        "title": "Scrap Tech Workshop",
+        "url": "https://www.curseforge.com/minecraft/mc-mods/scrap-tech-workshop",
+        "versions": "1.20.1",
+        "owner": "Mohiyo"
+    },
+    {
+        "author": "greateric",
+        "description": "Custom weapons plugin adding 75 custom items and gameplay mechanics",
+        "icon": "https://www.spigotmc.org/data/resource_icons/127/127725.jpg",
+        "title": "WeaponMaster",
+        "url": "https://www.spigotmc.org/resources/weaponmaster.127725/",
+        "versions": "1.10.0 1.11.0 1.6.0 1.7.0 1.8.0 1.9.0",
         "owner": "Mohiyo"
     }
 ]

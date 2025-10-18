@@ -19,29 +19,19 @@ def get_modrinth_title(slug):
 # -------- SPIGOT --------
 def get_spigot_title(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until='domcontentloaded')
-
-            try:
-                page.wait_for_selector("h1.resource-title__name", timeout=3000)
-                title_element = page.query_selector("h1.resource-title__name")
-                
-                if title_element:
-                    full_text = title_element.inner_text().strip()
-                    title = full_text.rsplit(' ', 1)[0]
-                    browser.close()
-                    return title
-            except Exception:
-                title = page.title()
-                if title and "|" in title:
-                    title = title.split("|")[0].strip()
-                browser.close()
-                return title
-
-            browser.close()
+        match = re.search(r'/resources/[^/]+\.(\d+)/?', url)
+        if not match:
             return None
+        
+        resource_id = match.group(1)
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}"
+        
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        return data.get('name')
     except Exception:
         return None
 
@@ -59,40 +49,28 @@ def get_hangar_title(combined_slug):
 # -------- CURSEFORGE --------
 def get_curseforge_title(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-            )
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1920, 'height': 1080}
-            )
-            page = context.new_page()
-            page.goto(url, wait_until='domcontentloaded', timeout=30000)
-            page.wait_for_timeout(2000)
-
-            try:
-                title_element = page.query_selector("h1, h2")
-                if title_element:
-                    title = title_element.inner_text().strip()
-                    if title and title != "Just a moment...":
-                        browser.close()
-                        return title
-            except Exception:
-                pass
-            
-            title = page.title()
-            if title and title != "Just a moment...":
-                if "-" in title:
-                    title = title.split("-")[0].strip()
-                if "|" in title:
-                    title = title.split("|")[0].strip()
-                browser.close()
-                return title
-            
-            browser.close()
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        if len(path_parts) < 3:
             return None
+        
+        project_slug = path_parts[2]
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm'
+        }
+        
+        response = requests.get(api_url, headers=headers)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        if data.get('data') and len(data['data']) > 0:
+            return data['data'][0].get('name')
+        
+        return None
     except Exception:
         return None
 

@@ -39,45 +39,19 @@ def get_modrinth_author(slug):
 # -------- SPIGOT --------
 def get_spigot_author(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until='domcontentloaded')
-
-            try:
-                page.wait_for_selector('.sidebar .section .secondaryContent', timeout=3000)
-                
-                author_selectors = [
-                    '.author a',
-                    '.secondaryContent a[href*="/members/"]',
-                    '.secondaryContent a[href*="/authors/"]',
-                    '.statistic a[href*="/members/"]',
-                    '.statistic a[href*="/authors/"]'
-                ]
-                
-                for selector in author_selectors:
-                    author_link = page.query_selector(selector)
-                    if author_link:
-                        author_name = author_link.inner_text().strip()
-                        if author_name and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
-                            browser.close()
-                            return author_name
-                
-                all_links = page.query_selector_all('a')
-                for link in all_links:
-                    href = link.get_attribute('href') or ''
-                    if ('/members/' in href or '/authors/' in href) and not ('/resources/' in href):
-                        author_name = link.inner_text().strip()
-                        if author_name and len(author_name) > 2 and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
-                            browser.close()
-                            return author_name
-                
-                browser.close()
-                return None
-                
-            except Exception:
-                browser.close()
-                return None
+        match = re.search(r'/resources/[^/]+\.(\d+)/?', url)
+        if not match:
+            return None
+        
+        resource_id = match.group(1)
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}/author"
+        
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        return data.get('name')
     except Exception:
         return None
 
@@ -95,31 +69,30 @@ def get_hangar_author(combined_slug):
 # -------- CURSEFORGE --------
 def get_curseforge_author(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-            )
-            context = browser.new_context(
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                viewport={'width': 1920, 'height': 1080}
-            )
-            page = context.new_page()
-            page.goto(url, wait_until='domcontentloaded', timeout=30000)
-            page.wait_for_timeout(2000)
-
-            try:
-                all_links = page.query_selector_all("a[href*='/members/']")
-                if all_links:
-                    author = all_links[0].inner_text().strip()
-                    if author:
-                        browser.close()
-                        return author
-            except Exception:
-                pass
-            
-            browser.close()
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        if len(path_parts) < 3:
             return None
+        
+        project_slug = path_parts[2]
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm'
+        }
+        
+        response = requests.get(api_url, headers=headers)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        if data.get('data') and len(data['data']) > 0:
+            authors = data['data'][0].get('authors', [])
+            if authors:
+                return authors[0].get('name')
+        
+        return None
     except Exception:
         return None
 
