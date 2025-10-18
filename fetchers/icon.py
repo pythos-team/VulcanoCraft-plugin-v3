@@ -24,57 +24,28 @@ def get_modrinth_icon(slug):
 # -------- SPIGOT --------
 def get_spigot_icon(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until='domcontentloaded')
-
-            try:
-                page.wait_for_selector("img.resourceIcon", timeout=3000)
-                icon_element = page.query_selector("img.resourceIcon")
-                
-                if icon_element:
-                    icon_url = icon_element.get_attribute("src")
-                    if icon_url:
-                        if '?' in icon_url:
-                            icon_url = icon_url.split('?')[0]
-                        
-                        if icon_url.startswith("http"):
-                            browser.close()
-                            return icon_url
-                        else:
-                            parsed_base = urlparse(url)
-                            if icon_url.startswith("data/"):
-                                browser.close()
-                                return f"https://www.spigotmc.org/{icon_url}"
-                            else:
-                                browser.close()
-                                return f"{parsed_base.scheme}://{parsed_base.netloc}{icon_url}"
-            except Exception:
-                try:
-                    page.wait_for_selector("img.resource-icon, .resource-image img", timeout=2000)
-                    icon_element = page.query_selector("img.resource-icon, .resource-image img")
-                    if icon_element:
-                        icon_url = icon_element.get_attribute("src")
-                        if icon_url:
-                            if '?' in icon_url:
-                                icon_url = icon_url.split('?')[0]
-                            if icon_url.startswith("http"):
-                                browser.close()
-                                return icon_url
-                            else:
-                                parsed_base = urlparse(url)
-                                if icon_url.startswith("data/"):
-                                    browser.close()
-                                    return f"https://www.spigotmc.org/{icon_url}"
-                                else:
-                                    browser.close()
-                                    return f"{parsed_base.scheme}://{parsed_base.netloc}{icon_url}"
-                except:
-                    pass
-                
-                browser.close()
-                return None
+        match = re.search(r'/resources/[^/]+\.(\d+)/?', url)
+        if not match:
+            return None
+        
+        resource_id = match.group(1)
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}"
+        
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        icon = data.get('icon')
+        if icon and 'url' in icon:
+            icon_url = icon['url']
+            if not icon_url.startswith('http'):
+                icon_url = f"https://www.spigotmc.org/{icon_url}"
+            if '?' in icon_url:
+                icon_url = icon_url.split('?')[0]
+            return icon_url
+        
+        return None
     except Exception:
         return None
 
@@ -93,6 +64,39 @@ def get_hangar_icon(combined_slug):
             return urlunparse((parsed.scheme, parsed.netloc, parsed.path, '', '', ''))
         return None
         
+    except Exception:
+        return None
+
+# -------- CURSEFORGE --------
+def get_curseforge_icon(url):
+    try:
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        if len(path_parts) < 3:
+            return None
+        
+        project_slug = path_parts[2]
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm'
+        }
+        
+        response = requests.get(api_url, headers=headers)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        if data.get('data') and len(data['data']) > 0:
+            logo = data['data'][0].get('logo')
+            if logo:
+                icon_url = logo.get('thumbnailUrl') or logo.get('url')
+                if icon_url and '?' in icon_url:
+                    icon_url = icon_url.split('?')[0]
+                return icon_url
+        
+        return None
     except Exception:
         return None
 
@@ -116,6 +120,9 @@ def detect_platform(url):
                 author = match.group(1)
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
+
+        elif "curseforge.com" in host:
+            return "curseforge", url
 
         return None, None
     except Exception:
@@ -141,6 +148,8 @@ def main():
         icon_url = get_spigot_icon(identifier)
     elif platform == "hangar":
         icon_url = get_hangar_icon(identifier)
+    elif platform == "curseforge":
+        icon_url = get_curseforge_icon(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)

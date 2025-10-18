@@ -19,24 +19,19 @@ def get_modrinth_description(slug):
 # -------- SPIGOT --------
 def get_spigot_description(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until='domcontentloaded')
-
-            try:
-                page.wait_for_selector("p.tagline", timeout=3000)
-                description_element = page.query_selector("p.tagline")
-                description = description_element.inner_text().strip() if description_element else None
-            except Exception:
-                description_element = page.query_selector('meta[name="description"]')
-                if description_element:
-                    description = description_element.get_attribute("content")
-                else:
-                    description = None
-
-            browser.close()
-            return description
+        match = re.search(r'/resources/[^/]+\.(\d+)/?', url)
+        if not match:
+            return None
+        
+        resource_id = match.group(1)
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}"
+        
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        return data.get('tag')
     except Exception:
         return None
 
@@ -48,6 +43,34 @@ def get_hangar_description(combined_slug):
         response.raise_for_status()
         data = response.json()
         return data.get("description")
+    except Exception:
+        return None
+
+# -------- CURSEFORGE --------
+def get_curseforge_description(url):
+    try:
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        if len(path_parts) < 3:
+            return None
+        
+        project_slug = path_parts[2]
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm'
+        }
+        
+        response = requests.get(api_url, headers=headers)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        if data.get('data') and len(data['data']) > 0:
+            return data['data'][0].get('summary')
+        
+        return None
     except Exception:
         return None
 
@@ -71,6 +94,9 @@ def detect_platform(url):
                 author = match.group(1)
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
+
+        elif "curseforge.com" in host:
+            return "curseforge", url
 
         return None, None
     except Exception:
@@ -96,6 +122,8 @@ def main():
         description = get_spigot_description(identifier)
     elif platform == "hangar":
         description = get_hangar_description(identifier)
+    elif platform == "curseforge":
+        description = get_curseforge_description(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)

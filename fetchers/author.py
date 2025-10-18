@@ -39,45 +39,19 @@ def get_modrinth_author(slug):
 # -------- SPIGOT --------
 def get_spigot_author(url):
     try:
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=True)
-            page = browser.new_page()
-            page.goto(url, wait_until='domcontentloaded')
-
-            try:
-                page.wait_for_selector('.sidebar .section .secondaryContent', timeout=3000)
-                
-                author_selectors = [
-                    '.author a',
-                    '.secondaryContent a[href*="/members/"]',
-                    '.secondaryContent a[href*="/authors/"]',
-                    '.statistic a[href*="/members/"]',
-                    '.statistic a[href*="/authors/"]'
-                ]
-                
-                for selector in author_selectors:
-                    author_link = page.query_selector(selector)
-                    if author_link:
-                        author_name = author_link.inner_text().strip()
-                        if author_name and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
-                            browser.close()
-                            return author_name
-                
-                all_links = page.query_selector_all('a')
-                for link in all_links:
-                    href = link.get_attribute('href') or ''
-                    if ('/members/' in href or '/authors/' in href) and not ('/resources/' in href):
-                        author_name = link.inner_text().strip()
-                        if author_name and len(author_name) > 2 and not any(x in author_name.lower() for x in ['tools', 'utilities', 'category', 'download']):
-                            browser.close()
-                            return author_name
-                
-                browser.close()
-                return None
-                
-            except Exception:
-                browser.close()
-                return None
+        match = re.search(r'/resources/[^/]+\.(\d+)/?', url)
+        if not match:
+            return None
+        
+        resource_id = match.group(1)
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}/author"
+        
+        response = requests.get(api_url)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        return data.get('name')
     except Exception:
         return None
 
@@ -88,6 +62,36 @@ def get_hangar_author(combined_slug):
         parts = combined_slug.split('/')
         if len(parts) >= 1:
             return parts[0]
+        return None
+    except Exception:
+        return None
+
+# -------- CURSEFORGE --------
+def get_curseforge_author(url):
+    try:
+        parsed = urlparse(url)
+        path_parts = parsed.path.strip('/').split('/')
+        if len(path_parts) < 3:
+            return None
+        
+        project_slug = path_parts[2]
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        headers = {
+            'Accept': 'application/json',
+            'x-api-key': '$2a$10$bL4bIL5pUWqfcO7KQtnMReakwtfHbNKh6v1uTpKlzhwoueEJQnPnm'
+        }
+        
+        response = requests.get(api_url, headers=headers)
+        if response.status_code != 200:
+            return None
+        
+        data = response.json()
+        if data.get('data') and len(data['data']) > 0:
+            authors = data['data'][0].get('authors', [])
+            if authors:
+                return authors[0].get('name')
+        
         return None
     except Exception:
         return None
@@ -113,6 +117,9 @@ def detect_platform(url):
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
 
+        elif "curseforge.com" in host:
+            return "curseforge", url
+
         return None, None
     except Exception:
         return None, None
@@ -137,6 +144,8 @@ def main():
         author = get_spigot_author(identifier)
     elif platform == "hangar":
         author = get_hangar_author(identifier)
+    elif platform == "curseforge":
+        author = get_curseforge_author(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)
