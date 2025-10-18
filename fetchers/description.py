@@ -51,6 +51,44 @@ def get_hangar_description(combined_slug):
     except Exception:
         return None
 
+# -------- CURSEFORGE --------
+def get_curseforge_description(url):
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            )
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1920, 'height': 1080}
+            )
+            page = context.new_page()
+            page.goto(url, wait_until='domcontentloaded', timeout=30000)
+            page.wait_for_timeout(2000)
+
+            try:
+                meta_desc = page.query_selector("meta[name='description']")
+                if meta_desc:
+                    description = meta_desc.get_attribute("content")
+                    if description:
+                        browser.close()
+                        return description
+                
+                desc_element = page.query_selector("p")
+                if desc_element:
+                    description = desc_element.inner_text().strip()
+                    if description:
+                        browser.close()
+                        return description
+            except Exception:
+                pass
+            
+            browser.close()
+            return None
+    except Exception:
+        return None
+
 # -------- PLATFORM DETECTION --------
 def detect_platform(url):
     try:
@@ -71,6 +109,9 @@ def detect_platform(url):
                 author = match.group(1)
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
+
+        elif "curseforge.com" in host:
+            return "curseforge", url
 
         return None, None
     except Exception:
@@ -96,6 +137,8 @@ def main():
         description = get_spigot_description(identifier)
     elif platform == "hangar":
         description = get_hangar_description(identifier)
+    elif platform == "curseforge":
+        description = get_curseforge_description(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)

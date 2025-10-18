@@ -226,6 +226,10 @@
                                                 <input class="form-check-input platform-filter" type="checkbox" id="modrinthFilter" value="modrinth" checked>
                                                 <label class="form-check-label" for="modrinthFilter">Modrinth</label>
                                             </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input platform-filter" type="checkbox" id="curseforgeFilter" value="curseforge" checked>
+                                                <label class="form-check-label" for="curseforgeFilter">CurseForge</label>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-md-2">
@@ -881,6 +885,7 @@
                 if (url.includes('hangar.papermc.io')) return 'hangar';
                 if (url.includes('spigotmc.org')) return 'spigot';
                 if (url.includes('modrinth.com')) return 'modrinth';
+                if (url.includes('curseforge.com')) return 'curseforge';
                 return 'unknown';
             }
             

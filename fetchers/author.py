@@ -92,6 +92,37 @@ def get_hangar_author(combined_slug):
     except Exception:
         return None
 
+# -------- CURSEFORGE --------
+def get_curseforge_author(url):
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            )
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1920, 'height': 1080}
+            )
+            page = context.new_page()
+            page.goto(url, wait_until='domcontentloaded', timeout=30000)
+            page.wait_for_timeout(2000)
+
+            try:
+                all_links = page.query_selector_all("a[href*='/members/']")
+                if all_links:
+                    author = all_links[0].inner_text().strip()
+                    if author:
+                        browser.close()
+                        return author
+            except Exception:
+                pass
+            
+            browser.close()
+            return None
+    except Exception:
+        return None
+
 # -------- PLATFORM DETECTION --------
 def detect_platform(url):
     try:
@@ -112,6 +143,9 @@ def detect_platform(url):
                 author = match.group(1)
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
+
+        elif "curseforge.com" in host:
+            return "curseforge", url
 
         return None, None
     except Exception:
@@ -137,6 +171,8 @@ def main():
         author = get_spigot_author(identifier)
     elif platform == "hangar":
         author = get_hangar_author(identifier)
+    elif platform == "curseforge":
+        author = get_curseforge_author(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)

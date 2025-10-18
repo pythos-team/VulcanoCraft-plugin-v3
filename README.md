@@ -91,6 +91,7 @@ Updates all plugins every hour automatically.
 - **SpigotMC** – `spigotmc.org/resources/*`
 - **Modrinth** – `modrinth.com/plugin/*`
 - **Hangar** – `hangar.papermc.io/*/*`
+- **CurseForge** – `curseforge.com/minecraft/*`
 
 ---
 

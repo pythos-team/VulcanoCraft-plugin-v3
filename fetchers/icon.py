@@ -96,6 +96,43 @@ def get_hangar_icon(combined_slug):
     except Exception:
         return None
 
+# -------- CURSEFORGE --------
+def get_curseforge_icon(url):
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=['--disable-blink-features=AutomationControlled', '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+            )
+            context = browser.new_context(
+                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                viewport={'width': 1920, 'height': 1080}
+            )
+            page = context.new_page()
+            page.goto(url, wait_until='domcontentloaded', timeout=30000)
+            page.wait_for_timeout(2000)
+
+            try:
+                all_images = page.query_selector_all("img")
+                for img in all_images:
+                    icon_url = img.get_attribute("src")
+                    if not icon_url:
+                        continue
+                    if icon_url.startswith("//"):
+                        icon_url = "https:" + icon_url
+                    if icon_url.startswith("http") and "avatars/thumbnails" in icon_url:
+                        if '?' in icon_url:
+                            icon_url = icon_url.split('?')[0]
+                        browser.close()
+                        return icon_url
+            except Exception:
+                pass
+            
+            browser.close()
+            return None
+    except Exception:
+        return None
+
 # -------- PLATFORM DETECTION --------
 def detect_platform(url):
     try:
@@ -116,6 +153,9 @@ def detect_platform(url):
                 author = match.group(1)
                 project = match.group(2)
                 return "hangar", f"{author}/{project}"
+
+        elif "curseforge.com" in host:
+            return "curseforge", url
 
         return None, None
     except Exception:
@@ -141,6 +181,8 @@ def main():
         icon_url = get_spigot_icon(identifier)
     elif platform == "hangar":
         icon_url = get_hangar_icon(identifier)
+    elif platform == "curseforge":
+        icon_url = get_curseforge_icon(identifier)
     else:
         print("Invalid URL", file=sys.stderr)
         sys.exit(1)
