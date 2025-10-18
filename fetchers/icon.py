@@ -75,8 +75,14 @@ def get_curseforge_icon(url):
         if len(path_parts) < 3:
             return None
         
+        category = path_parts[1]
         project_slug = path_parts[2]
-        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        class_id = 6 if category == 'mc-mods' else 4471 if category == 'modpacks' else None
+        if not class_id:
+            return None
+        
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}&classId={class_id}"
         
         headers = {
             'Accept': 'application/json',
@@ -88,7 +94,7 @@ def get_curseforge_icon(url):
             return None
         
         data = response.json()
-        if data.get('data') and len(data['data']) > 0:
+        if data.get('data'):
             logo = data['data'][0].get('logo')
             if logo:
                 icon_url = logo.get('thumbnailUrl') or logo.get('url')

@@ -43,18 +43,14 @@ def get_spigot_game_versions(url):
             return None
         
         resource_id = match.group(1)
-        api_url = f"https://api.spiget.org/v2/resources/{resource_id}/versions?size=100"
+        api_url = f"https://api.spiget.org/v2/resources/{resource_id}"
         
         response = requests.get(api_url)
         if response.status_code != 200:
             return None
         
         data = response.json()
-        versions = set()
-        for version in data:
-            game_version = version.get('name', '')
-            matches = re.findall(r'1\.\d+(?:\.\d+)?', game_version)
-            versions.update(matches)
+        versions = data.get('testedVersions', [])
         
         return sorted(versions) if versions else []
     except Exception:
@@ -102,8 +98,14 @@ def get_curseforge_game_versions(url):
         if len(path_parts) < 3:
             return []
         
+        category = path_parts[1]
         project_slug = path_parts[2]
-        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}"
+        
+        class_id = 6 if category == 'mc-mods' else 4471 if category == 'modpacks' else None
+        if not class_id:
+            return []
+        
+        api_url = f"https://api.curseforge.com/v1/mods/search?gameId=432&slug={project_slug}&classId={class_id}"
         
         headers = {
             'Accept': 'application/json',
