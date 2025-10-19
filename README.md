@@ -109,3 +109,4 @@ Updates all plugins every hour automatically.
 
 ---
 <p align="right">made possible by <code>_.g.a.u.t.a.m._</code> on discord.</p>
+<p align="right">made possible by <code>[Swapnanilb](https://github.com/Swapnanilb)</code></p>
