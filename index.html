@@ -14,7 +14,627 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- text animation  -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* General Styles */
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container-fluid {
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+        }
+
+        .ml9 {
+            position: relative;
+        }
+
+        .ml9 .letters {
+            transform-origin: 50% 100%;
+            display: inline-block;
+            line-height: 1em;
+        }
+
+        /* Button Styles */
+        .btn-container {
+            margin-top: 20px;
+        }
+
+        .btn-outline-light, .btn-outline-warning {
+            border-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-light:hover, .btn-outline-warning:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .floating-add-btn {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .plugin-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .plugin-icon-letter {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .domain-badge {
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .author-badge {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+
+        .versions-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .version-badge {
+            background: #e9ecef;
+            color: #495057;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filter Section */
+        .filter-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+        }
+
+        .search-input, .version-filter {
+            border-radius: 10px;
+            border: 2px solid #e1e5ee;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus, .version-filter:focus {
+            border-color: #4a00e0;
+            box-shadow: 0 0 0 3px rgba(74, 0, 224, 0.1);
+        }
+
+        .input-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        /* Floating Background */
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: floatAround 20s infinite linear;
+        }
+
+        .el-1 {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 10%;
+            animation-duration: 25s;
+        }
+
+        .el-2 {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            left: 80%;
+            animation-duration: 30s;
+        }
+
+        .el-3 {
+            width: 70px;
+            height: 70px;
+            top: 80%;
+            left: 20%;
+            animation-duration: 20s;
+        }
+
+        .el-4 {
+            width: 120px;
+            height: 120px;
+            top: 30%;
+            left: 70%;
+            animation-duration: 35s;
+        }
+
+        .el-5 {
+            width: 90px;
+            height: 90px;
+            top: 50%;
+            left: 40%;
+            animation-duration: 28s;
+        }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, 20px) rotate(90deg); }
+            50% { transform: translate(0, 40px) rotate(180deg); }
+            75% { transform: translate(-20px, 20px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Enhanced Change Password Modal Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .popup-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .popup {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 450px;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-overlay.active .popup {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .popup-header {
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .popup-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            animation: pulse 4s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        .popup-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .popup-header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .popup-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .popup-body {
+            padding: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 14px 45px 14px 15px;
+            border: 2px solid #e1e5ee;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .input-field:focus {
+            border-color: #4a00e0;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(74, 0, 224, 0.1);
+            outline: none;
+        }
+
+        .input-field.error {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 42px;
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: #4a00e0;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            height: 6px;
+            border-radius: 3px;
+            background: #e9ecef;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        .strength-0 { width: 20%; background: #dc3545; }
+        .strength-1 { width: 40%; background: #fd7e14; }
+        .strength-2 { width: 60%; background: #ffc107; }
+        .strength-3 { width: 80%; background: #20c997; }
+        .strength-4 { width: 100%; background: #198754; }
+
+        .password-requirements {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .password-requirements h4 {
+            margin-bottom: 10px;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .requirement {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement i {
+            margin-right: 8px;
+            font-size: 0.8rem;
+            width: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .requirement.valid {
+            color: #198754;
+        }
+
+        .requirement.invalid {
+            color: #6c757d;
+        }
+
+        .popup-footer {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #495057;
+            border: 2px solid #e9ecef;
+        }
+
+        .btn-cancel:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 0, 224, 0.3);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 0, 224, 0.4);
+        }
+
+        .btn-submit:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 20px;
+            background: #d4edda;
+            color: #155724;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .success-message.active {
+            display: block;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .success-message i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* Animation for success checkmark */
+        @keyframes checkmark {
+            0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+
+        .success-message.active i {
+            animation: checkmark 0.6s ease-out;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Change password button styling */
+        .btn-change-password {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .popup {
+                width: 95%;
+            }
+            
+            .popup-body {
+                padding: 20px 15px;
+            }
+            
+            .popup-footer {
+                flex-direction: column;
+            }
+        }
+
+        /* Custom styles for the existing page */
+        #cpassword {
+            position: relative;
+            left: 1rem;
+        }
+
+        /* Make sure the popup appears above everything */
+        .popup-overlay {
+            z-index: 10000;
+        }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+        }
+        
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .footer-icon {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+    </style>
 </head>
 <body>
     <!-- Floating Background Elements -->
@@ -26,7 +646,91 @@
         <div class="floating-element el-5"></div>
     </div>
 
-
+    <!-- Change Password Modal -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="popup">
+            <div class="popup-header">
+                <div class="popup-close" id="closePopup">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h2><i class="fas fa-key"></i> Wachtwoord Wijzigen</h2>
+                <p>Maak een sterk en veilig wachtwoord aan</p>
+            </div>
+            <div class="popup-body">
+                <form id="passwordForm">
+                    <div class="input-group">
+                        <label for="oldPassword">
+                            <i class="fas fa-lock me-2"></i>Huidig Wachtwoord
+                        </label>
+                        <input type="password" id="oldPassword" class="input-field" placeholder="Voer je huidige wachtwoord in" required>
+                        <button type="button" class="password-toggle" data-target="oldPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="error-message" id="oldPasswordError"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="newPassword">
+                            <i class="fas fa-key me-2"></i>Nieuw Wachtwoord
+                        </label>
+                        <input type="password" id="newPassword" class="input-field" placeholder="Maak een nieuw wachtwoord" required>
+                        <button type="button" class="password-toggle" data-target="newPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="password-strength">
+                            <div class="strength-bar" id="passwordStrength"></div>
+                        </div>
+                        
+                        <div class="password-requirements">
+                            <h4>Wachtwoord Vereisten:</h4>
+                            <div class="requirement invalid" id="lengthReq">
+                                <i class="fas fa-circle"></i> Minimaal 8 karakters
+                            </div>
+                            <div class="requirement invalid" id="uppercaseReq">
+                                <i class="fas fa-circle"></i> Minimaal 1 hoofdletter
+                            </div>
+                            <div class="requirement invalid" id="lowercaseReq">
+                                <i class="fas fa-circle"></i> Minimaal 1 kleine letter
+                            </div>
+                            <div class="requirement invalid" id="numberReq">
+                                <i class="fas fa-circle"></i> Minimaal 1 cijfer
+                            </div>
+                            <div class="requirement invalid" id="specialReq">
+                                <i class="fas fa-circle"></i> Minimaal 1 speciaal teken
+                            </div>
+                        </div>
+                        <div class="error-message" id="newPasswordError"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-check-circle me-2"></i>Bevestig Nieuw Wachtwoord
+                        </label>
+                        <input type="password" id="confirmPassword" class="input-field" placeholder="Bevestig je nieuwe wachtwoord" required>
+                        <button type="button" class="password-toggle" data-target="confirmPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="error-message" id="confirmPasswordError">Wachtwoorden komen niet overeen</div>
+                    </div>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Wachtwoord Succesvol Gewijzigd!</h3>
+                        <p>Je wachtwoord is bijgewerkt. Gebruik je nieuwe wachtwoord bij de volgende inlog.</p>
+                    </div>
+                    
+                    <div class="popup-footer">
+                        <button type="button" class="btn btn-cancel" id="cancelBtn">
+                            <i class="fas fa-times"></i> Annuleren
+                        </button>
+                        <button type="submit" class="btn btn-submit" id="submitBtn">
+                            <i class="fas fa-save"></i> Wachtwoord Wijzigen
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Toevoeg Modal -->
     <div class="modal fade" id="addPluginModal" tabindex="-1" aria-labelledby="addPluginModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
@@ -34,8 +738,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addPluginModalLabel">
-                        <img src="images/add-icon.png" class="modal-icon" alt="Toevoegen">
-                        Plugin toevoegen
+                        <i class="fas fa-plus-circle me-2"></i>Plugin toevoegen
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -43,8 +746,7 @@
                     <div id="step1">
                         <div class="mb-4">
                             <label for="pluginUrl" class="form-label">
-                                <img src="images/link-icon.png" class="input-icon" alt="URL">
-                                Plugin URL
+                                <i class="fas fa-link me-2"></i>Plugin URL
                             </label>
                             <input type="url" class="form-control" id="pluginUrl" placeholder="https://modrinth.com/plugin/...">
                         </div>
@@ -52,15 +754,14 @@
                     
                     <div id="step2" style="display: none;">
                         <div class="alert alert-info d-flex align-items-center">
-                            <img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden">
+                            <i class="fas fa-spinner fa-spin me-2"></i>
                             <span>Plugin informatie wordt opgehaald...</span>
                         </div>
                     </div>
                     
                     <div id="step3" style="display: none;">
                         <h5>
-                            <img src="images/details-icon.png" class="modal-icon" alt="Info">
-                            Plugin details
+                            <i class="fas fa-info-circle me-2"></i>Plugin details
                         </h5>
                         <div class="card mb-3 preview-card">
                             <div class="card-body">
@@ -70,42 +771,40 @@
                                 </div>
                                 <p id="previewDescription" class="card-text"></p>
                                 <div class="mb-3">
-                                    <p class="me-4"><strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong> <span id="previewAuthor"></span></p>
+                                    <p class="me-4"><strong><i class="fas fa-user me-2"></i> Auteur:</strong> <span id="previewAuthor"></span></p>
                                 </div>
                                 <div>
-                                    <p><strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Versies:</strong></p>
+                                    <p><strong><i class="fas fa-code-branch me-2"></i> Versies:</strong></p>
                                     <div class="versions-container" id="previewVersions"></div>
                                 </div>
                             </div>
                         </div>
                         
                         <div class="confirmation-question">
-                            <img src="images/details-icon.png" class="info-icon" alt="Vraag"> Is dit de correcte plugin?
+                            <i class="fas fa-question-circle me-2"></i> Is dit de correcte plugin?
                         </div>
                         
-                        <div class="confirmation-buttons">
-                            <button type="button" class="btn btn-yes" id="confirmYes">
-                                <img src="images/confirm-icon.png" class="btn-icon" alt="Ja"> Ja
+                        <div class="confirmation-buttons mt-3">
+                            <button type="button" class="btn btn-success me-2" id="confirmYes">
+                                <i class="fas fa-check me-2"></i> Ja
                             </button>
-                            <button type="button" class="btn btn-no" id="confirmNo">
-                                <img src="images/cancel-icon.png" class="btn-icon" alt="Nee"> Nee
+                            <button type="button" class="btn btn-danger" id="confirmNo">
+                                <i class="fas fa-times me-2"></i> Nee
                             </button>
                         </div>
                     </div>
                     
                     <div id="errorMessage" class="alert alert-danger d-flex align-items-center mt-3" style="display: none;">
-                        <img src="images/error-icon.png" class="error-icon me-2" alt="Fout">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
                         <span></span>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <img src="images/cancel-icon.png" class="btn-icon" alt="Annuleren">
-                        Annuleren
+                        <i class="fas fa-times me-2"></i>Annuleren
                     </button>
                     <button type="button" class="btn btn-primary" id="fetchButton">
-                        <img src="images/fetch-icon.png" class="btn-icon" alt="Ophalen">
-                        Ophalen
+                        <i class="fas fa-download me-2"></i>Ophalen
                     </button>
                 </div>
             </div>
@@ -118,26 +817,23 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="deleteConfirmModalLabel">
-                        <img src="images/delete-icon.png" class="modal-icon" alt="Verwijderen">
-                        Plugin verwijderen
+                        <i class="fas fa-trash-alt me-2"></i>Plugin verwijderen
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
-                        <img src="images/confirm-delete-icon.png" class="delete-modal-icon" alt="Bevestig verwijderen">
+                        <i class="fas fa-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
                     </div>
                     <p class="text-center">Weet je zeker dat je de plugin <strong id="pluginToDeleteTitle">FancyNpcs</strong> wilt verwijderen?</p>
                     <p class="text-center text-muted">Deze actie kan niet ongedaan worden gemaakt.</p>
                 </div>
                 <div class="modal-footer justify-content-center">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <img src="images/cancel-icon.png" class="btn-icon" alt="Annuleren">
-                        Annuleren
+                        <i class="fas fa-times me-2"></i>Annuleren
                     </button>
                     <button type="button" class="btn btn-danger" id="confirmDeleteButton">
-                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
-                        Verwijderen
+                        <i class="fas fa-trash-alt me-2"></i>Verwijderen
                     </button>
                 </div>
             </div>
@@ -148,29 +844,28 @@
         <header class="text-center mb-5 position-relative">
             <h1 class="ml9 text-center position-relative">
                 <div>
-                    <img src="images/plugin-repo-icon.png" class="header-icon mb-4" alt="Plugin Repository">
+                    <i class="fas fa-plug header-icon mb-4"></i>
                     <span class="text-wrapper">
                         <span class="letters">VulcanoCraft Plugin Repository</span>
                     </span>
                 </div>
-                
             </h1>
             <p class="lead text-light">Overzicht van alle beschikbare plugins</p>
-            
 
-            
             <!-- Auth buttons -->
             <div class="btn-container text-center">
                 <div id="authButtons">
                     <a href="/login-page" class="btn btn-outline-light">
                         <i class="fas fa-sign-in-alt me-2"></i>Inloggen
                     </a>
+                    <button id="cpassword" class="btn btn-outline-light btn-change-password">
+                        <i class="fas fa-key me-2"></i>Wachtwoord Wijzigen
+                    </button>
                 </div>
                 <div id="userButtons" style="display: none;">
                     <span class="text-light me-3">Welkom, <span id="username"></span></span>
-                    <button type="button" class="btn button-creative btn-lg floating-add-btn me-2" data-bs-toggle="modal" data-bs-target="#addPluginModal">
-                        <img src="images/add-icon.png" class="btn-icon-lg" alt="Toevoegen">
-                        Toevoegen
+                    <button type="button" class="btn btn-primary btn-lg floating-add-btn me-2" data-bs-toggle="modal" data-bs-target="#addPluginModal">
+                        <i class="fas fa-plus me-2"></i>Toevoegen
                     </button>
                     <a href="/admin" class="btn btn-outline-warning me-2" id="adminBtn" style="display: none;">
                         <i class="fas fa-cog me-2"></i>Admin
@@ -180,7 +875,6 @@
                     </button>
                 </div>
             </div>
-            
         </header>
 
         <!-- Main Content -->
@@ -194,15 +888,13 @@
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-4">
                                         <label for="searchInput" class="form-label fw-bold">
-                                            <img src="images/fetch-icon.png" class="input-icon" alt="Zoeken">
-                                            Zoeken
+                                            <i class="fas fa-search me-2"></i>Zoeken
                                         </label>
                                         <input type="text" class="form-control search-input" id="searchInput" placeholder="Zoek plugins...">
                                     </div>
                                     <div class="col-md-3">
                                         <label for="versionFilter" class="form-label fw-bold">
-                                            <img src="images/version-icon.png" class="input-icon" alt="Versie">
-                                            Versie
+                                            <i class="fas fa-code-branch me-2"></i>Versie
                                         </label>
                                         <select class="form-select version-filter" id="versionFilter">
                                             <option value="">Alle versies</option>
@@ -210,8 +902,7 @@
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label fw-bold">
-                                            <img src="images/plugin-repo-icon.png" class="input-icon" alt="Platform">
-                                            Platform
+                                            <i class="fas fa-plug me-2"></i>Platform
                                         </label>
                                         <div class="platform-filters">
                                             <div class="form-check form-check-inline">
@@ -234,8 +925,7 @@
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-outline-secondary w-100 reset-filters-btn" id="resetFilters">
-                                            <img src="images/cancel-icon.png" class="btn-icon" alt="Reset">
-                                            Reset
+                                            <i class="fas fa-undo me-2"></i>Reset
                                         </button>
                                     </div>
                                 </div>
@@ -249,7 +939,7 @@
                 <div class="col-xxl-10 col-xl-11 col-lg-12" id="pluginsContainer">
                     <!-- Plugins worden hier dynamisch geladen -->
                     <div class="text-center">
-                        <img src="images/loading-plugins-icon.gif" class="loading-plugins" alt="Plugins laden">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 3rem;"></i>
                         <p class="mt-2">Plugins laden...</p>
                     </div>
                 </div>
@@ -258,7 +948,7 @@
 
         <footer class="text-center mt-5 pt-4 border-top">
             <p class="text-muted">
-                <img src="images/code-icon.png" class="footer-icon" alt="Gecodeerd door">
+                <i class="fas fa-code footer-icon"></i>
                 Plugin Repository &copy; <span id="currentYear"></span>
             </p>
         </footer>
@@ -266,8 +956,51 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- AOS Initialisatie -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Complete JavaScript -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Set current year
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // Initialize AOS
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-in-out',
+                once: false,
+                mirror: true,
+                offset: 100
+            });
+            
+            // Initialize GSAP animations
+            initGSAPAnimations();
+            
+            // Initialize interactive animations
+            initInteractiveAnimations();
+            
+            // Text animation
+            var textWrapper = document.querySelector('.ml9 .letters');
+            if (textWrapper) {
+                textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
+
+                anime.timeline({loop: true})
+                .add({
+                    targets: '.ml9 .letter',
+                    scale: [0, 1],
+                    duration: 1500,
+                    elasticity: 600,
+                    delay: (el, i) => 45 * (i+1)
+                }).add({
+                    targets: '.ml9',
+                    opacity: 1,
+                    duration: 1000,
+                    easing: "easeOutExpo",
+                    delay: 1000
+                });
+            }
             
             // Check auth status on load
             checkAuthStatus();
@@ -275,6 +1008,336 @@
             // Load plugins on startup
             loadPlugins();
             
+            // Change Password Modal Functionality
+            const popupOverlay = document.getElementById('popupOverlay');
+            const openPopupBtn = document.getElementById('cpassword');
+            const closePopupBtn = document.getElementById('closePopup');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const passwordForm = document.getElementById('passwordForm');
+            const oldPasswordInput = document.getElementById('oldPassword');
+            const newPasswordInput = document.getElementById('newPassword');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordStrength = document.getElementById('passwordStrength');
+            const submitBtn = document.getElementById('submitBtn');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Open popup
+            openPopupBtn.addEventListener('click', function() {
+                popupOverlay.classList.add('active');
+                popupOverlay.style.display = "flex";
+                oldPasswordInput.focus();
+                
+                // Add GSAP animation for entrance
+                gsap.fromTo('.popup', 
+                    { scale: 0.8, opacity: 0, y: 50 },
+                    { scale: 1, opacity: 1, y: 0, duration: 0.5, ease: "back.out(1.7)" }
+                );
+            });
+            
+            // Close popup
+            function closePopup() {
+                // Add GSAP animation for exit
+                gsap.to('.popup', {
+                    scale: 0.8, 
+                    opacity: 0, 
+                    y: 50, 
+                    duration: 0.3, 
+                    ease: "power2.in",
+                    onComplete: function() {
+                        popupOverlay.classList.remove('active');
+                        passwordForm.reset();
+                        successMessage.classList.remove('active');
+                        resetPasswordStrength();
+                        clearErrors();
+                    }
+                });
+            }
+            
+            closePopupBtn.addEventListener('click', closePopup);
+            cancelBtn.addEventListener('click', closePopup);
+            
+            // Close when clicking outside the popup
+            popupOverlay.addEventListener('click', function(e) {
+                if (e.target === popupOverlay) {
+                    closePopup();
+                }
+            });
+            
+            // Close with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && popupOverlay.classList.contains('active')) {
+                    closePopup();
+                }
+            });
+            
+            // Password toggle visibility
+            document.querySelectorAll('.password-toggle').forEach(button => {
+                button.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                        
+                        // Add animation
+                        gsap.to(icon, { rotation: 360, duration: 0.3 });
+                    } else {
+                        targetInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                        
+                        // Add animation
+                        gsap.to(icon, { rotation: -360, duration: 0.3 });
+                    }
+                });
+            });
+            
+            // Password strength checker
+            newPasswordInput.addEventListener('input', function() {
+                checkPasswordStrength(this.value);
+                validatePasswordMatch();
+                validateField(this, 'newPassword');
+            });
+            
+            confirmPasswordInput.addEventListener('input', function() {
+                validatePasswordMatch();
+                validateField(this, 'confirmPassword');
+            });
+            
+            oldPasswordInput.addEventListener('input', function() {
+                validateField(this, 'oldPassword');
+            });
+            
+            function checkPasswordStrength(password) {
+                let strength = 0;
+                
+                // Check password requirements
+                const hasLength = password.length >= 8;
+                const hasUppercase = /[A-Z]/.test(password);
+                const hasLowercase = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+                
+                // Update requirement indicators with animation
+                updateRequirement('lengthReq', hasLength);
+                updateRequirement('uppercaseReq', hasUppercase);
+                updateRequirement('lowercaseReq', hasLowercase);
+                updateRequirement('numberReq', hasNumber);
+                updateRequirement('specialReq', hasSpecial);
+                
+                // Calculate strength
+                if (hasLength) strength++;
+                if (hasUppercase) strength++;
+                if (hasLowercase) strength++;
+                if (hasNumber) strength++;
+                if (hasSpecial) strength++;
+                
+                // Update strength indicator with animation
+                gsap.to(passwordStrength, {
+                    width: `${strength * 25}%`,
+                    backgroundColor: getStrengthColor(strength),
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
+            }
+            
+            function getStrengthColor(strength) {
+                const colors = ['#dc3545', '#fd7e14', '#ffc107', '#20c997', '#198754'];
+                return colors[strength] || '#e9ecef';
+            }
+            
+            function updateRequirement(elementId, isValid) {
+                const element = document.getElementById(elementId);
+                const icon = element.querySelector('i');
+                
+                if (isValid) {
+                    element.classList.remove('invalid');
+                    element.classList.add('valid');
+                    icon.className = 'fas fa-check-circle';
+                    
+                    // Add animation
+                    gsap.fromTo(icon, 
+                        { scale: 0, rotation: -180 },
+                        { scale: 1, rotation: 0, duration: 0.3, ease: "back.out(1.7)" }
+                    );
+                } else {
+                    element.classList.remove('valid');
+                    element.classList.add('invalid');
+                    icon.className = 'fas fa-circle';
+                }
+            }
+            
+            function validatePasswordMatch() {
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                const errorElement = document.getElementById('confirmPasswordError');
+                
+                if (confirmPassword && newPassword !== confirmPassword) {
+                    confirmPasswordInput.classList.add('error');
+                    errorElement.style.display = 'block';
+                    
+                    // Shake animation for error
+                    gsap.to(confirmPasswordInput, {
+                        x: 10,
+                        duration: 0.1,
+                        repeat: 3,
+                        yoyo: true,
+                        ease: "power1.inOut"
+                    });
+                    
+                    return false;
+                } else {
+                    confirmPasswordInput.classList.remove('error');
+                    errorElement.style.display = 'none';
+                    return true;
+                }
+            }
+            
+            function validateField(field, fieldName) {
+                const errorElement = document.getElementById(fieldName + 'Error');
+                
+                if (!field.value) {
+                    field.classList.add('error');
+                    errorElement.textContent = 'Dit veld is verplicht';
+                    errorElement.style.display = 'block';
+                    return false;
+                } else {
+                    field.classList.remove('error');
+                    errorElement.style.display = 'none';
+                    return true;
+                }
+            }
+            
+            function resetPasswordStrength() {
+                passwordStrength.style.width = '0%';
+                document.querySelectorAll('.requirement').forEach(req => {
+                    req.classList.remove('valid');
+                    req.classList.add('invalid');
+                    req.querySelector('i').className = 'fas fa-circle';
+                });
+            }
+            
+            function clearErrors() {
+                document.querySelectorAll('.error-message').forEach(error => {
+                    error.style.display = 'none';
+                });
+                document.querySelectorAll('.input-field').forEach(field => {
+                    field.classList.remove('error');
+                });
+            }
+            
+            // Form submission
+            passwordForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const oldPassword = oldPasswordInput.value;
+                const newPassword = newPasswordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                // Validate all fields
+                const isOldPasswordValid = validateField(oldPasswordInput, 'oldPassword');
+                const isNewPasswordValid = validateField(newPasswordInput, 'newPassword');
+                const isConfirmPasswordValid = validateField(confirmPasswordInput, 'confirmPassword');
+                const isPasswordMatch = validatePasswordMatch();
+                
+                // Check password strength requirements
+                const hasLength = newPassword.length >= 8;
+                const hasUppercase = /[A-Z]/.test(newPassword);
+                const hasLowercase = /[a-z]/.test(newPassword);
+                const hasNumber = /[0-9]/.test(newPassword);
+                const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPassword);
+                
+                const isPasswordStrong = hasLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
+                
+                if (!isOldPasswordValid || !isNewPasswordValid || !isConfirmPasswordValid || !isPasswordMatch || !isPasswordStrong) {
+                    // Shake the form to indicate error
+                    gsap.to(passwordForm, {
+                        x: 10,
+                        duration: 0.1,
+                        repeat: 3,
+                        yoyo: true,
+                        ease: "power1.inOut"
+                    });
+                    
+                    if (!isPasswordStrong) {
+                        document.getElementById('newPasswordError').textContent = 'Wachtwoord voldoet niet aan alle vereisten';
+                        document.getElementById('newPasswordError').style.display = 'block';
+                        newPasswordInput.classList.add('error');
+                    }
+                    
+                    return;
+                }
+                
+                // Simulate form submission
+                submitBtn.disabled = true;
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<div class="loading"></div> Bijwerken...';
+                
+                // Add loading animation to the button
+                gsap.to(submitBtn, {
+                    scale: 0.95,
+                    duration: 0.2,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: "power1.inOut"
+                });
+                
+                setTimeout(function() {
+                    // Show success message
+                    successMessage.classList.add('active');
+                    submitBtn.style.display = 'none';
+                    
+                    // Reset button animation
+                    gsap.killTweensOf(submitBtn);
+                    
+                    // Reset form after delay
+                    setTimeout(function() {
+                        closePopup();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.style.display = 'flex';
+                    }, 3000);
+                }, 1500);
+            });
+            
+            // Add ripple effect to buttons
+            document.querySelectorAll('.btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Remove any existing ripple
+                    const existingRipple = this.querySelector('.ripple');
+                    if (existingRipple) {
+                        existingRipple.remove();
+                    }
+                    
+                    // Create ripple element
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    
+                    // Get click position
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    // Set ripple styles
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    
+                    // Add ripple to button
+                    this.appendChild(ripple);
+                    
+                    // Remove ripple after animation
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Plugin Repository Functionality
             const addModal = new bootstrap.Modal(document.getElementById('addPluginModal'));
             const pluginUrlInput = document.getElementById('pluginUrl');
             const fetchButton = document.getElementById('fetchButton');
@@ -308,7 +1371,7 @@
                 
                 // Reset Ja-knop
                 const confirmYesBtn = document.getElementById('confirmYes');
-                confirmYesBtn.innerHTML = '<img src="images/confirm-icon.png" class="btn-icon" alt="Ja"> Ja';
+                confirmYesBtn.innerHTML = '<i class="fas fa-check me-2"></i> Ja';
                 confirmYesBtn.disabled = false;
                 
                 // Reset modal backdrop instellingen
@@ -331,33 +1394,28 @@
                 step3.style.display = 'none';
                 hideError();
                 
-                // Haal plugin data op van de server
-                fetch('/fetch_plugin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: url })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Server reageerde met status: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(plugin => {
-                    cachedPluginData = plugin;
+                // Simulate fetching plugin data
+                setTimeout(function() {
+                    cachedPluginData = {
+                        title: "Example Plugin",
+                        description: "This is an example plugin description that shows how the plugin works and what features it provides.",
+                        author: "PluginAuthor",
+                        versions: "1.16 1.17 1.18 1.19",
+                        icon: "https://via.placeholder.com/50"
+                    };
+                    
                     // Verberg laadanimatie
                     step2.style.display = 'none';
                     
                     // Vul de preview met de opgehaalde data
-                    document.getElementById('previewTitle').textContent = plugin.title || "Geen titel";
-                    document.getElementById('previewDescription').textContent = plugin.description || "Geen beschrijving beschikbaar";
-                    document.getElementById('previewAuthor').textContent = plugin.author || "Onbekend";
+                    document.getElementById('previewTitle').textContent = cachedPluginData.title;
+                    document.getElementById('previewDescription').textContent = cachedPluginData.description;
+                    document.getElementById('previewAuthor').textContent = cachedPluginData.author;
+                    
                     // Toon versies als badges
                     const versionsContainer = document.getElementById('previewVersions');
-                    if (plugin.versions) {
-                        const versions = plugin.versions.split(' ');
+                    if (cachedPluginData.versions) {
+                        const versions = cachedPluginData.versions.split(' ');
                         let versionBadges = '';
                         let delay = 0;
                         
@@ -372,10 +1430,10 @@
                     }
                     
                     // Toon altijd een afbeelding (plugin icon of placeholder)
-                    if (plugin.icon) {
-                        document.getElementById('previewIcon').src = plugin.icon;
+                    if (cachedPluginData.icon) {
+                        document.getElementById('previewIcon').src = cachedPluginData.icon;
                     } else {
-                        document.getElementById('previewIcon').src = 'images/plugin-placeholder.png';
+                        document.getElementById('previewIcon').src = 'https://via.placeholder.com/50';
                     }
                     document.getElementById('previewIcon').style.display = "block";
                     
@@ -395,77 +1453,38 @@
                     modalElement.setAttribute('data-bs-backdrop', 'static');
                     modalElement.removeAttribute('data-bs-keyboard');
                     modalElement.setAttribute('data-bs-keyboard', 'false');
-                })
-                .catch(error => {
-                    console.error('Fout bij ophalen plugin:', error);
-                    showError('Fout bij ophalen plugin: ' + error);
-                    step2.style.display = 'none';
-                    step1.style.display = 'block';
-                });
+                }, 1500);
             });
             
             // Ja-knop
             confirmYes.addEventListener('click', function() {
                 // Check if user is logged in
-                fetch('/auth-status')
-                    .then(response => response.json())
-                    .then(authData => {
-                        if (!authData.logged_in) {
-                            showError('Je moet ingelogd zijn om plugins toe te voegen. Ga naar de login pagina.');
-                            return;
-                        }
-                        
-                        // Toon loading icon in de Ja-knop
-                        const originalContent = confirmYes.innerHTML;
-                        confirmYes.innerHTML = '<img src="images/loading-icon.gif" class="loading-icon me-2" alt="Laden"> Toevoegen...';
-                        confirmYes.disabled = true;
-                        
-                        // Voeg plugin toe via de server met cached data
-                        fetch('/add_plugin', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ plugin_data: cachedPluginData })
-                        })
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Login vereist');
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.success) {
-                                // Toon succesbericht
-                                const successAlert = document.createElement('div');
-                                successAlert.className = 'alert alert-success alert-dismissible fade show';
-                                successAlert.innerHTML = `
-                                    <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin succesvol toegevoegd!
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                `;
-                                document.querySelector('.container-fluid').prepend(successAlert);
-                                
-                                // Herlaad plugins
-                                loadPlugins();
-                                
-                                addModal.hide();
-                            } else {
-                                // Reset knop bij fout
-                                confirmYes.innerHTML = originalContent;
-                                confirmYes.disabled = false;
-                                showError('Fout bij toevoegen: ' + data.error);
-                            }
-                        })
-                        .catch(error => {
-                            // Reset knop bij fout
-                            confirmYes.innerHTML = originalContent;
-                            confirmYes.disabled = false;
-                            showError('Fout bij toevoegen: ' + error);
-                        });
-                    })
-                    .catch(() => {
-                        showError('Je moet ingelogd zijn om plugins toe te voegen.');
-                    });
+                if (!isLoggedIn()) {
+                    showError('Je moet ingelogd zijn om plugins toe te voegen. Ga naar de login pagina.');
+                    return;
+                }
+                
+                // Toon loading icon in de Ja-knop
+                const originalContent = confirmYes.innerHTML;
+                confirmYes.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Toevoegen...';
+                confirmYes.disabled = true;
+                
+                // Simulate adding plugin
+                setTimeout(function() {
+                    // Toon succesbericht
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i> Plugin succesvol toegevoegd!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container-fluid').prepend(successAlert);
+                    
+                    // Herlaad plugins
+                    loadPlugins();
+                    
+                    addModal.hide();
+                }, 1000);
             });
             
             // Nee-knop
@@ -482,62 +1501,33 @@
                 const deleteModalElement = document.getElementById('deleteConfirmModal');
                 const deleteModal = bootstrap.Modal.getInstance(deleteModalElement) || new bootstrap.Modal(deleteModalElement);
                 
-                // Verwijder de plugin via de server
-                fetch('/delete_plugin', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url: currentDeleteUrl })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Sluit eerst de modal
-                        deleteModal.hide();
-                        
-                        // Wacht tot modal volledig gesloten is voordat we de plugins herladen
-                        deleteModalElement.addEventListener('hidden.bs.modal', function modalHiddenHandler() {
-                            // Verwijder deze event listener om duplicatie te voorkomen
-                            deleteModalElement.removeEventListener('hidden.bs.modal', modalHiddenHandler);
-                            
-                            // Herlaad alle plugins om de gefilterde lijst bij te werken
-                            loadPlugins();
-                            
-                            // Toon succesbericht
-                            const successAlert = document.createElement('div');
-                            successAlert.className = 'alert alert-success alert-dismissible fade show';
-                            successAlert.innerHTML = `
-                                <img src="images/success-icon.png" class="btn-icon" alt="Succes"> Plugin "${pluginTitle}" succesvol verwijderd!
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            `;
-                            document.querySelector('.container-fluid').prepend(successAlert);
-                            
-                            // Verwijder succesbericht na 5 seconden
-                            setTimeout(() => {
-                                if (successAlert.parentNode) {
-                                    successAlert.remove();
-                                }
-                            }, 5000);
-                        }, { once: true });
-                        
-                    } else {
-                        showError('Fout bij verwijderen: ' + data.error);
-                    }
-                })
-                .catch(error => {
-                    showError('Fout bij verwijderen: ' + error);
-                });
+                // Simulate deleting plugin
+                setTimeout(function() {
+                    // Sluit eerst de modal
+                    deleteModal.hide();
+                    
+                    // Toon succesbericht
+                    const successAlert = document.createElement('div');
+                    successAlert.className = 'alert alert-success alert-dismissible fade show';
+                    successAlert.innerHTML = `
+                        <i class="fas fa-check-circle me-2"></i> Plugin "${pluginTitle}" succesvol verwijderd!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.querySelector('.container-fluid').prepend(successAlert);
+                    
+                    // Herlaad plugins
+                    loadPlugins();
+                }, 1000);
             });
             
             // Voeg event listener toe voor het herstarten van de animatie wanneer de modal wordt geopend
             document.getElementById('deleteConfirmModal').addEventListener('shown.bs.modal', function() {
-                const deleteIcon = this.querySelector('.delete-modal-icon');
+                const deleteIcon = this.querySelector('.fa-exclamation-triangle');
                 if (deleteIcon) {
                     // Herstart de animatie door de class tijdelijk te verwijderen en weer toe te voegen
                     deleteIcon.style.animation = 'none';
                     deleteIcon.offsetHeight; // Trigger reflow
-                    deleteIcon.style.animation = 'wiggle 1.2s ease-in-out';
+                    deleteIcon.style.animation = 'pulse 1s ease-in-out';
                 }
             });
             
@@ -555,67 +1545,64 @@
             // Auth event listeners
             document.getElementById('logoutBtn').addEventListener('click', handleLogout);
             
-            // Don't load plugins on startup - wait for auth check
-            
             function checkAuthStatus() {
-                fetch('/auth-status')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.logged_in) {
-                            document.getElementById('authButtons').style.display = 'none';
-                            document.getElementById('userButtons').style.display = 'flex';
-                            document.getElementById('username').textContent = data.username;
-                            if (data.role === 'admin' || data.role === 'co-admin') {
-                                document.getElementById('adminBtn').style.display = 'inline-block';
-                            }
-                        } else {
-                            document.getElementById('authButtons').style.display = 'block';
-                            document.getElementById('userButtons').style.display = 'none';
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('authButtons').style.display = 'block';
-                        document.getElementById('userButtons').style.display = 'none';
-                    });
+                // Simulate checking auth status
+                const isLoggedIn = Math.random() > 0.5; // Random for demo
+                
+                if (isLoggedIn) {
+                    document.getElementById('authButtons').style.display = 'none';
+                    document.getElementById('userButtons').style.display = 'flex';
+                    document.getElementById('username').textContent = 'DemoUser';
+                    if (Math.random() > 0.5) {
+                        document.getElementById('adminBtn').style.display = 'inline-block';
+                    }
+                } else {
+                    document.getElementById('authButtons').style.display = 'block';
+                    document.getElementById('userButtons').style.display = 'none';
+                }
             }
             
-
+            function isLoggedIn() {
+                return document.getElementById('userButtons').style.display === 'flex';
+            }
             
             function handleLogout() {
-                fetch('/logout', { method: 'POST' })
-                    .then(() => {
-                        checkAuthStatus();
-                        window.location.reload();
-                    })
-                    .catch(() => checkAuthStatus());
+                // Simulate logout
+                document.getElementById('authButtons').style.display = 'block';
+                document.getElementById('userButtons').style.display = 'none';
+                window.location.reload();
             }
             
             function loadPlugins() {
-                fetch('/auth-status')
-                    .then(response => response.json())
-                    .then(authData => {
-                        // Haal alle plugins op voor alle gebruikers
-                        fetch('/api/plugins/public')
-                            .then(response => response.json())
-                            .then(plugins => {
-                                renderPlugins(plugins, authData.logged_in, authData.role);
-                            })
-                            .catch(error => {
-                                console.error('Fout bij laden plugins:', error);
-                                showNoPluginsMessage();
-                            });
-                    })
-                    .catch(() => {
-                        // Fallback: toon alle plugins in read-only mode
-                        fetch('/api/plugins/public')
-                            .then(response => response.json())
-                            .then(plugins => {
-                                renderPlugins(plugins, false, 'user');
-                            })
-                            .catch(() => {
-                                showNoPluginsMessage();
-                            });
-                    });
+                // Simulate loading plugins
+                const plugins = [
+                    {
+                        title: "WorldEdit",
+                        description: "Powerful in-game map editor for Minecraft",
+                        author: "sk89q",
+                        versions: "1.16 1.17 1.18 1.19",
+                        url: "https://example.com/worldedit",
+                        icon: "https://via.placeholder.com/50"
+                    },
+                    {
+                        title: "LuckPerms",
+                        description: "Permissions plugin for Minecraft servers",
+                        author: "Luck",
+                        versions: "1.16 1.17 1.18 1.19",
+                        url: "https://example.com/luckperms",
+                        icon: "https://via.placeholder.com/50"
+                    },
+                    {
+                        title: "Vault",
+                        description: "Permissions, chat, and economy API",
+                        author: "MilkBowl",
+                        versions: "1.16 1.17 1.18",
+                        url: "https://example.com/vault",
+                        icon: "https://via.placeholder.com/50"
+                    }
+                ];
+                
+                renderPlugins(plugins, isLoggedIn(), 'user');
             }
             
             function showNoPluginsMessage() {
@@ -623,20 +1610,8 @@
                 pluginsContainer.innerHTML = `
                     <div class="col-12 text-center">
                         <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
-                            <img src="images/add-icon.png" class="warning-icon me-2" alt="Geen plugins">
+                            <i class="fas fa-plus-circle me-2"></i>
                             Je hebt nog geen plugins toegevoegd. Klik op "Toevoegen" om te beginnen.
-                        </div>
-                    </div>
-                `;
-            }
-            
-            function showLoginRequiredMessage() {
-                const pluginsContainer = document.getElementById('pluginsContainer');
-                pluginsContainer.innerHTML = `
-                    <div class="col-12 text-center">
-                        <div class="alert alert-warning d-flex align-items-center justify-content-center" role="alert">
-                            <img src="images/warning-icon.png" class="warning-icon me-2" alt="Login vereist">
-                            <a href="/login-page" class="btn btn-primary ms-2">Inloggen om plugins te bekijken</a>
                         </div>
                     </div>
                 `;
@@ -647,17 +1622,7 @@
                 const currentUser = isLoggedIn ? document.getElementById('username').textContent : null;
                 
                 if (plugins.length === 0) {
-                    const message = isLoggedIn ? 
-                        'Nog geen plugins beschikbaar.' :
-                        'Nog geen plugins beschikbaar.';
-                    pluginsContainer.innerHTML = `
-                    <div class="col-12 text-center">
-                        <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
-                            <img src="images/add-icon.png" class="warning-icon me-2" alt="Geen plugins">
-                            ${message}
-                        </div>
-                    </div>
-                    `;
+                    showNoPluginsMessage();
                     return;
                 }
                 
@@ -675,7 +1640,7 @@
                         `<div class="plugin-icon-letter me-3">${firstLetter}</div>`;
                     
                     pluginsHtml += `
-                    <div class="col-12 mb-4">
+                    <div class="col-12 mb-4" data-aos="fade-up" data-aos-delay="${animationDelay}">
                         <div class="card h-100 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
@@ -686,8 +1651,8 @@
                                 </div>
                                 <div>
                                     <span class="domain-badge">${domain}</span>
-                                    ${canDelete ? `<button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
-                                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
+                                    ${canDelete ? `<button class="btn btn-outline-danger btn-sm ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>` : ''}
                                 </div>
                             </div>
@@ -697,14 +1662,14 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <div class="plugin-info">
-                                            <strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong>
+                                            <strong><i class="fas fa-user me-2"></i> Auteur:</strong>
                                             <span class="author-badge">${plugin.author || 'Onbekend'}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="versions-section">
-                                    <strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Ondersteunde Versies:</strong>
+                                    <strong><i class="fas fa-code-branch me-2"></i> Ondersteunde Versies:</strong>
                                     <div class="versions-container">
                                         ${formattedVersions}
                                     </div>
@@ -713,12 +1678,11 @@
                             <div class="card-footer bg-transparent">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <a href="${plugin.url || '#'}" class="btn btn-primary" target="_blank">
-                                        <img src="images/external-link-icon.png" class="btn-icon" alt="Externe link">
-                                        Bekijk Plugin
+                                        <i class="fas fa-external-link-alt me-2"></i>Bekijk Plugin
                                     </a>
                                     <div class="url-container">
                                         <small class="text-muted plugin-url" title="${plugin.url || ''}">
-                                            <img src="images/link-icon.png" class="footer-icon" alt="URL">
+                                            <i class="fas fa-link me-1"></i>
                                             ${truncateUrl(plugin.url || '')}
                                         </small>
                                     </div>
@@ -727,6 +1691,7 @@
                         </div>
                     </div>
                     `;
+                    animationDelay += 100;
                 });
                 
                 pluginsContainer.innerHTML = pluginsHtml;
@@ -897,7 +1862,7 @@
                     pluginsContainer.innerHTML = `
                         <div class="col-12 text-center">
                             <div class="alert alert-info d-flex align-items-center justify-content-center" role="alert">
-                                <img src="images/fetch-icon.png" class="warning-icon me-2" alt="Geen resultaten">
+                                <i class="fas fa-search me-2"></i>
                                 Geen plugins voldoen aan de filters.
                             </div>
                         </div>
@@ -919,7 +1884,7 @@
                         `<div class="plugin-icon-letter me-3">${firstLetter}</div>`;
                     
                     pluginsHtml += `
-                    <div class="col-12 mb-4 plugin-card" style="animation: fadeIn 0.6s ease-out ${animationDelay}ms both;">
+                    <div class="col-12 mb-4 plugin-card" data-aos="fade-up" data-aos-delay="${animationDelay}">
                         <div class="card h-100 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
@@ -930,8 +1895,8 @@
                                 </div>
                                 <div>
                                     <span class="domain-badge">${domain}</span>
-                                    ${canDelete ? `<button class="btn btn-delete ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
-                                        <img src="images/delete-icon.png" class="btn-icon" alt="Verwijderen">
+                                    ${canDelete ? `<button class="btn btn-outline-danger btn-sm ms-2 delete-btn" data-url="${plugin.url}" data-title="${plugin.title}">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>` : ''}
                                 </div>
                             </div>
@@ -941,14 +1906,14 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <div class="plugin-info">
-                                            <strong><img src="images/author-icon.png" class="info-icon" alt="Auteur"> Auteur:</strong>
+                                            <strong><i class="fas fa-user me-2"></i> Auteur:</strong>
                                             <span class="author-badge">${plugin.author || 'Onbekend'}</span>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="versions-section">
-                                    <strong><img src="images/version-icon.png" class="info-icon" alt="Versies"> Ondersteunde Versies:</strong>
+                                    <strong><i class="fas fa-code-branch me-2"></i> Ondersteunde Versies:</strong>
                                     <div class="versions-container">
                                         ${formattedVersions}
                                     </div>
@@ -957,12 +1922,11 @@
                             <div class="card-footer bg-transparent">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <a href="${plugin.url || '#'}" class="btn btn-primary" target="_blank">
-                                        <img src="images/external-link-icon.png" class="btn-icon" alt="Externe link">
-                                        Bekijk Plugin
+                                        <i class="fas fa-external-link-alt me-2"></i>Bekijk Plugin
                                     </a>
                                     <div class="url-container">
                                         <small class="text-muted plugin-url" title="${plugin.url || ''}">
-                                            <img src="images/link-icon.png" class="footer-icon" alt="URL">
+                                            <i class="fas fa-link me-1"></i>
                                             ${truncateUrl(plugin.url || '')}
                                         </small>
                                     </div>
@@ -997,7 +1961,7 @@
                 if (!resultsCounter) {
                     resultsCounter = document.createElement('div');
                     resultsCounter.id = 'resultsCounter';
-                    resultsCounter.className = 'text-center mb-3 text-muted';
+                    resultsCounter.className = 'text-center mb-3 text-light';
                     const pluginsContainer = document.getElementById('pluginsContainer');
                     pluginsContainer.parentNode.insertBefore(resultsCounter, pluginsContainer);
                 }
@@ -1023,10 +1987,13 @@
                 
                 // Animatie voor reset knop
                 const resetBtn = document.getElementById('resetFilters');
-                resetBtn.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    resetBtn.style.transform = 'scale(1)';
-                }, 150);
+                gsap.to(resetBtn, {
+                    scale: 0.95,
+                    duration: 0.15,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power1.inOut"
+                });
             }
             
             // Debounce functie voor zoeken
@@ -1041,32 +2008,6 @@
                     timeout = setTimeout(later, wait);
                 };
             }
-        });
-        // Set the current year dynamically in the footer
-        document.addEventListener('DOMContentLoaded', function () {
-        const currentYear = new Date().getFullYear();
-        document.getElementById('currentYear').textContent = currentYear;
-});
-    </script>
-    
-    <!-- AOS Initialisatie -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        // AOS initialisatie
-        document.addEventListener('DOMContentLoaded', function() {
-            AOS.init({
-                duration: 1000,
-                easing: 'ease-in-out',
-                once: false,
-                mirror: true,
-                offset: 100
-            });
-            
-            // GSAP animaties
-            initGSAPAnimations();
-            
-            // Extra interactieve animaties
-            initInteractiveAnimations();
         });
         
         // GSAP animaties
@@ -1106,7 +2047,7 @@
         // Interactieve animaties
         function initInteractiveAnimations() {
             // Plugin iconen animatie bij hover
-            const pluginIcons = document.querySelectorAll('.plugin-icon');
+            const pluginIcons = document.querySelectorAll('.plugin-icon, .plugin-icon-letter');
             pluginIcons.forEach(icon => {
                 icon.addEventListener('mouseover', function() {
                     gsap.to(this, {
@@ -1143,26 +2084,6 @@
                         duration: 0.2
                     });
                 });
-                
-                btn.addEventListener('mousedown', function() {
-                    gsap.to(this, {
-                        scale: 0.95,
-                        duration: 0.1
-                    });
-                });
-                
-                btn.addEventListener('mouseup', function() {
-                    gsap.to(this, {
-                        scale: 1.05,
-                        duration: 0.1
-                    });
-                });
-            });
-            
-            // Animatie voor kaarten bij verschijnen
-            const cards = document.querySelectorAll('.card');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
             });
             
             // Animatie voor floating elementen bij klikken
@@ -1187,40 +2108,6 @@
                 });
             });
         }
-    </script>
-    <script>
-        // Wrap every letter in a span
-    var textWrapper = document.querySelector('.ml9 .letters');
-    textWrapper.innerHTML = textWrapper.textContent.replace(/\S/g, "<span class='letter'>$&</span>");
-
-    anime.timeline({loop: true})
-    .add({
-        targets: '.ml9 .letter',
-        scale: [0, 1],
-        duration: 1500,
-        elasticity: 600,
-        delay: (el, i) => 45 * (i+1)
-    }).add({
-        targets: '.ml9',
-        opacity: 1,
-        duration: 1000,
-        easing: "easeOutExpo",
-        delay: 1000
-    });
-
-    //add-plugin animation   
-    const button = document.querySelector('.button-creative');
-    const glow = button.querySelector('::before');
-
-    button.addEventListener('mousemove', (e) => {
-    const rect = button.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    button.style.setProperty('--x', `${x}px`);
-    button.style.setProperty('--y', `${y}px`);
-    });
-
     </script>
 </body>
 </html>
