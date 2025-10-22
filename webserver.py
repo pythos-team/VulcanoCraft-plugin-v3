@@ -1,5 +1,5 @@
 # soketdb_flask_app.py
-from flask import Flask, json, jsonify, request, send_file, session
+from flask import Flask, json, jsonify, request, send_file, session, render_template
 import os
 import json as json_module
 import urllib.parse
