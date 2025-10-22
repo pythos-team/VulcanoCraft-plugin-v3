@@ -6,72 +6,455 @@
     <title>Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../../style.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --dark: #1a1a2e;
+            --darker: #0f0f1a;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-hover: rgba(255, 255, 255, 0.1);
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" opacity="0.03"><polygon fill="white" points="0,1000 1000,0 1000,1000"/></svg>');
+            background-size: cover;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            transition: transform 0.3s ease;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+        
+        .login-body {
+            padding: 2rem;
+        }
+        
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            padding: 0.75rem 1rem;
+        }
+        
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+            color: white;
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(67, 97, 238, 0.3);
+        }
+        
+        .admin-panel {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+        
+        .admin-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .admin-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .admin-card:hover {
+            transform: translateY(-5px);
+            background: var(--card-hover);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-card .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-bottom: none;
+            padding: 1.25rem;
+        }
+        
+        .admin-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .user-card, .plugin-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .user-card:hover, .plugin-card:hover {
+            transform: translateY(-5px);
+            background: var(--card-hover);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .role-badge {
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 50px;
+        }
+        
+        .role-admin {
+            background: linear-gradient(135deg, #e63946 0%, #d00000 100%);
+        }
+        
+        .role-coadmin {
+            background: linear-gradient(135deg, #f48c06 0%, #dc2f02 100%);
+        }
+        
+        .role-user {
+            background: linear-gradient(135deg, var(--gray) 0%, #495057 100%);
+        }
+        
+        .plugin-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+        
+        .form-switch .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .section-title {
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .floating-btn:hover {
+            transform: translateY(-5px) scale(1.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e63946;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
-    <div id="loginForm" class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header text-center">
-                        <h3><i class="fas fa-shield-alt me-2"></i>Admin Login</h3>
+    <!-- Login Form -->
+    <div id="loginForm" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                <h2>Admin Login</h2>
+                <p class="mb-0">Beveiligde toegang tot het beheerpaneel</p>
+            </div>
+            <div class="login-body">
+                <form id="adminLoginForm">
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="fas fa-user text-light"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0" id="adminUsername" placeholder="Gebruikersnaam" required>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form id="adminLoginForm">
-                            <div class="mb-3">
-                                <input type="text" class="form-control" id="adminUsername" placeholder="Username" required>
-                            </div>
-                            <div class="mb-3">
-                                <input type="password" class="form-control" id="adminPassword" placeholder="Password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Login</button>
-                        </form>
-                        <div id="loginError" class="alert alert-danger mt-3" style="display: none;"></div>
+                    <div class="mb-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="fas fa-lock text-light"></i>
+                            </span>
+                            <input type="password" class="form-control border-start-0" id="adminPassword" placeholder="Wachtwoord" required>
+                        </div>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Inloggen
+                    </button>
+                </form>
+                <div id="loginError" class="alert alert-danger mt-3 text-center" style="display: none; border-radius: 10px;"></div>
             </div>
         </div>
     </div>
 
-    <div id="adminPanel" class="container mt-5" style="display: none;">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3><i class="fas fa-cog me-2"></i>Admin Panel - <span id="adminRole"></span></h3>
-                        <div>
-                            <a href="/" class="btn btn-outline-primary me-2">
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel" style="display: none;">
+        <div class="container">
+            <!-- Header -->
+            <div class="admin-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1 class="h3 mb-0">
+                            <i class="fas fa-cog me-2"></i>Admin Panel
+                        </h1>
+                        <p class="mb-0 text-muted">Welkom, <span id="adminRole" class="fw-bold"></span></p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <div class="btn-group">
+                            <a href="/" class="btn btn-outline-light me-2">
                                 <i class="fas fa-home me-2"></i>Home
                             </a>
-                            <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                            <button class="btn btn-outline-light" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Uitloggen
+                            </button>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-5">
-                            <h4><i class="fas fa-sliders-h me-2"></i>Instellingen</h4>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="registrationToggle">
-                                <label class="form-check-label" for="registrationToggle">Registratie toestaan</label>
-                            </div>
-                        </div>
+                </div>
+            </div>
 
-                        <div class="mb-5" id="userManagement">
-                            <h4><i class="fas fa-users me-2"></i>Gebruikers</h4>
+            <!-- Stats Overview -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalUsers">0</div>
+                        <div class="stats-label">Totaal Gebruikers</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="totalPlugins">0</div>
+                        <div class="stats-label">Totaal Plugins</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="activeUsers">0</div>
+                        <div class="stats-label">Actieve Gebruikers</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number" id="pendingActions">0</div>
+                        <div class="stats-label">In Afwachting</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Settings Section -->
+                <div class="col-lg-4 mb-4">
+                    <div class="admin-card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Systeem Instellingen</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="registrationToggle">
+                                    <label class="form-check-label" for="registrationToggle">Registratie toestaan</label>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="maintenanceToggle">
+                                    <label class="form-check-label" for="maintenanceToggle">Onderhoudsmodus</label>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Beveiligingsniveau</label>
+                                <select class="form-select" id="securityLevel">
+                                    <option value="low">Laag</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">Hoog</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary w-100">
+                                <i class="fas fa-save me-2"></i>Instellingen Opslaan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Section -->
+                <div class="col-lg-8 mb-4">
+                    <div class="admin-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-users me-2"></i>Gebruikersbeheer</h5>
+                            <button class="btn btn-sm btn-light">
+                                <i class="fas fa-sync-alt me-1"></i>Vernieuwen
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="section-title">Alle Gebruikers</h6>
                             <div class="row" id="usersGrid">
-                                <div class="col-12 text-center"><p>Laden...</p></div>
+                                <div class="col-12 text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Laden...</span>
+                                    </div>
+                                    <p class="mt-2">Gebruikers worden geladen...</p>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <div id="pluginManagement">
-                            <h4><i class="fas fa-puzzle-piece me-2"></i>Plugins</h4>
+            <!-- Plugins Section -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="admin-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-puzzle-piece me-2"></i>Plugin Beheer</h5>
+                            <button class="btn btn-sm btn-light">
+                                <i class="fas fa-plus me-1"></i>Nieuwe Plugin
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="section-title">Alle Plugins</h6>
                             <div class="row" id="pluginsGrid">
-                                <div class="col-12 text-center"><p>Laden...</p></div>
+                                <div class="col-12 text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Laden...</span>
+                                    </div>
+                                    <p class="mt-2">Plugins worden geladen...</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <!-- Floating Action Button -->
+        <button class="floating-btn" onclick="scrollToTop()">
+            <i class="fas fa-arrow-up"></i>
+        </button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -113,9 +496,14 @@
                     showAdminPanel();
                 } else {
                     showLoginError(data.error);
+                // Add shake animation to login form
+                    document.querySelector('.login-card').classList.add('shake');
+                    setTimeout(() => {
+                        document.querySelector('.login-card').classList.remove('shake');
+                    }, 500);
                 }
             })
-            .catch(() => showLoginError('Login failed'));
+            .catch(() => showLoginError('Login mislukt. Controleer je verbinding.'));
         }
 
         function showAdminPanel() {
@@ -126,6 +514,7 @@
             loadUsers();
             loadPlugins();
             setupEventListeners();
+            updateStats();
         }
 
         function logout() {
@@ -142,6 +531,11 @@
             const errorDiv = document.getElementById('loginError');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
         }
 
         function setupEventListeners() {
@@ -176,35 +570,39 @@
                 .then(users => {
                     const grid = document.getElementById('usersGrid');
                     grid.innerHTML = users.map(user => `
-                        <div class="col-md-4 col-lg-3 mb-3">
-                            <div class="card h-100">
-                                <div class="card-body text-center">
-                                    <div class="mb-3">
-                                        <i class="fas fa-user-circle" style="font-size: 3rem; color: #6c757d;"></i>
-                                    </div>
-                                    <h6 class="card-title">${user.username}</h6>
-                                    <div class="mb-3">
-                                        <span class="badge ${getRoleBadgeClass(user.role)}">${user.role}</span>
-                                    </div>
-                                    <div class="mb-3">
-                                        <span class="badge bg-primary">
-                                            <i class="fas fa-puzzle-piece me-1"></i>${user.plugin_count} plugins
-                                        </span>
-                                    </div>
-                                    ${currentRole === 'admin' && user.username !== 'admin' ? `
-                                        <select class="form-select form-select-sm mb-2" onchange="changeRole('${user.username}', this.value)">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <div class="user-card p-3">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h6 class="text-center mb-2">${user.username}</h6>
+                                <div class="text-center mb-3">
+                                    <span class="role-badge ${getRoleBadgeClass(user.role)}">${user.role.toUpperCase()}</span>
+                                </div>
+                                <div class="text-center mb-3">
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-puzzle-piece me-1"></i>${user.plugin_count} plugins
+                                    </span>
+                                </div>
+                                ${currentRole === 'admin' && user.username !== 'admin' ? `
+                                    <div class="mb-2">
+                                        <select class="form-select form-select-sm" onchange="changeRole('${user.username}', this.value)">
                                             <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
                                             <option value="co-admin" ${user.role === 'co-admin' ? 'selected' : ''}>Co-Admin</option>
                                             <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
                                         </select>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.username}')">
-                                            <i class="fas fa-trash me-1"></i>Verwijderen
-                                        </button>
-                                    ` : ''}
-                                </div>
+                                    </div>
+                                    <button class="btn btn-danger btn-sm w-100" onclick="deleteUser('${user.username}')">
+                                        <i class="fas fa-trash me-1"></i>Verwijderen
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
                     `).join('');
+                    
+                    // Update stats
+                    document.getElementById('totalUsers').textContent = users.length;
+                    document.getElementById('activeUsers').textContent = users.filter(u => u.active).length;
                 });
         }
 
@@ -214,30 +612,47 @@
                 .then(plugins => {
                     const grid = document.getElementById('pluginsGrid');
                     grid.innerHTML = plugins.map(plugin => `
-                        <div class="col-md-6 mb-3">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-2">
-                                        <img src="${plugin.icon || '/images/plugin-placeholder.png'}" style="width: 40px; height: 40px; margin-right: 10px;" alt="icon">
-                                        <div>
-                                            <h6 class="mb-0">${plugin.title}</h6>
-                                            <small class="text-muted">door ${plugin.owner || 'Onbekend'}</small>
+                        <div class="col-md-6 col-xl-4 mb-3">
+                            <div class="plugin-card p-3">
+                                <div class="d-flex align-items-start mb-3">
+                                    <div class="plugin-icon me-3">
+                                        <i class="fas fa-puzzle-piece"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">${plugin.title}</h6>
+                                        <p class="text-muted small mb-2">door ${plugin.owner || 'Onbekend'}</p>
+                                        <div class="d-flex align-items-center">
+                                            <span class="badge bg-secondary me-2">v${plugin.version || '1.0'}</span>
+                                            <span class="badge bg-success">${plugin.downloads || 0} downloads</span>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button class="btn btn-outline-light btn-sm me-2">
+                                        <i class="fas fa-edit me-1"></i>Bewerk
+                                    </button>
                                     <button class="btn btn-danger btn-sm" onclick="deletePlugin('${plugin.url}', '${plugin.title}')">
-                                        <i class="fas fa-trash me-1"></i>Verwijderen
+                                        <i class="fas fa-trash me-1"></i>Verwijder
                                     </button>
                                 </div>
                             </div>
                         </div>
                     `).join('');
+                    
+                    // Update stats
+                    document.getElementById('totalPlugins').textContent = plugins.length;
                 });
         }
 
+        function updateStats() {
+            // Simulate some pending actions
+            document.getElementById('pendingActions').textContent = Math.floor(Math.random() * 5);
+        }
+
         function getRoleBadgeClass(role) {
-            if (role === 'admin') return 'bg-danger';
-            if (role === 'co-admin') return 'bg-warning';
-            return 'bg-secondary';
+            if (role === 'admin') return 'role-admin';
+            if (role === 'co-admin') return 'role-coadmin';
+            return 'role-user';
         }
 
         function changeRole(username, newRole) {
@@ -283,6 +698,24 @@
                     });
             }
         }
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Add shake animation for login errors
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+            .shake {
+                animation: shake 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

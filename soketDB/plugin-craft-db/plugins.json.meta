@@ -1,0 +1,11 @@
+{
+    "columns": [
+        "url",
+        "title",
+        "description",
+        "author",
+        "icon",
+        "versions",
+        "owner"
+    ]
+}
