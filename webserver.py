@@ -339,7 +339,7 @@ def register():
         if isinstance(existing, list) and existing:
             return jsonify({'error': 'Gebruikersnaam bestaat al'}), 400
 
-        user_row = {"username": username, "password": hash_password(password), "role": "user"}
+        user_row = {"username": username, "password": hash_password(password)}
         db.execute(f"INSERT INTO users DATA={json_module.dumps(user_row, ensure_ascii=False)}")
         return jsonify({'success': True})
     except Exception as e:
@@ -415,7 +415,11 @@ def registration_status():
 @app.route('/admin')
 def admin_panel():
     """Admin panel pagina"""
-    return send_file('components/admin/admin.html')
+    users = db.execute("SELECT * FROM users")
+    plugins = db.execute("SELECT * FROM plugins")
+    totalUsers = len(users) if users else 0
+    totalPlugins = len(plugins) if plugins else 0
+    return render_template('admin/admin.html', totalUsers=totalUsers, totalPlugins=totalPlugins)
 
 
 @app.route('/admin/login', methods=['POST'])
